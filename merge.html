@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gộp dữ liệu xã/phường</title>
+<style>body{font-family:system-ui,sans-serif;max-width:720px;margin:24px auto;padding:0 16px;line-height:1.5}button{font:inherit;padding:10px 16px}pre{background:#f3f6f6;padding:10px;white-space:pre-wrap}</style></head>
+<body>
+<h1>Gộp dữ liệu xã/phường</h1>
+<p>Chọn thư mục <b>geojson</b> (thư mục chứa 68_lam_dong, 56_khanh_hoa, 66_dak_lak...). Trang chỉ đọc 3 tỉnh này rồi tạo 3 file gộp để tải về. Dữ liệu được xử lý ngay trên máy bạn, không gửi đi đâu.</p>
+<input type="file" id="dir" webkitdirectory multiple>
+<p>Mức rút gọn đường viền: <select id="tol"><option value="0">Không rút gọn</option><option value="0.0001">Nhẹ (sai lệch tối đa ~11 m)</option><option value="0.0002" selected>Vừa (~22 m)</option><option value="0.0005">Mạnh (~55 m)</option></select></p>
+<p><button id="go" disabled>Gộp và tải file</button></p>
+<pre id="log">Chưa chọn thư mục.</pre>
+<script>
+const T = [{ key: 'lam_dong', out: 'lam-dong.geojson', name: 'Lâm Đồng' }, { key: 'khanh_hoa', out: 'khanh-hoa.geojson', name: 'Khánh Hòa' }, { key: 'dak_lak', out: 'dak-lak.geojson', name: 'Đắk Lắk' }];
+const L = document.getElementById('log'), go = document.getElementById('go');
+const say = t => { L.textContent += t + '\n'; };
+const ISL = [];
+const norm = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase().replace(/[_\-.]/g, ' ');
+let groups = {}, provs = {}, igroups = {};
+const rnd = c => typeof c[0] === 'number' ? [+c[0].toFixed(5), +c[1].toFixed(5)] : c.map(rnd);
+
+function dp(pts, tol) {
+  const n = pts.length; if (n <= 4) return pts;
+  const keep = new Uint8Array(n); keep[0] = keep[n - 1] = 1;
+  const stack = [[0, n - 1]], t2 = tol * tol;
+  while (stack.length) {
+    const [a, b] = stack.pop(); let max = 0, idx = -1;
+    const ax = pts[a][0], ay = pts[a][1], dx = pts[b][0] - ax, dy = pts[b][1] - ay, len2 = dx * dx + dy * dy;
+    for (let i = a + 1; i < b; i++) {
+      const px = pts[i][0] - ax, py = pts[i][1] - ay; let d2;
+      if (len2 === 0) d2 = px * px + py * py;
+      else { const u = Math.max(0, Math.min(1, (px * dx + py * dy) / len2)); d2 = (px - u * dx) ** 2 + (py - u * dy) ** 2; }
+      if (d2 > max) { max = d2; idx = i; }
+    }
+    if (max > t2 && idx > 0) { keep[idx] = 1; stack.push([a, idx], [idx, b]); }
+  }
+  return pts.filter((_, i) => keep[i]);
+}
+const simpRing = (r, tol) => { const s = dp(r, tol); return s.length >= 4 ? s : r; };
+function proc(geom, tol) {
+  const c = rnd(geom.coordinates);
+  if (!tol) return c;
+  if (geom.type === 'Polygon') return c.map(r => simpRing(r, tol));
+  if (geom.type === 'MultiPolygon') return c.map(p => p.map(r => simpRing(r, tol)));
+  return c;
+}
+document.getElementById('dir').onchange = e => {
+  groups = {}; provs = {}; igroups = {}; L.textContent = '';
+  for (const f of e.target.files) {
+    const parts = f.webkitRelativePath.split('/');
+    const t = T.find(t => parts.some(p => new RegExp('^\\d+_' + t.key + '$').test(p)));
+    if (t && parts.includes('wards') && /\.(geo)?json$/i.test(f.name)) (groups[t.key] = groups[t.key] || []).push(f);
+    else if (t && !parts.includes('wards') && /\.(geo)?json$/i.test(f.name) && new RegExp('^\\d+_' + t.key + '$').test(parts[parts.length - 2] || '')) provs[t.key] = f;
+    ISL.forEach(k => { if (parts.includes('wards') && /\.(geo)?json$/i.test(f.name) && parts.some(p => new RegExp('^\\d+_' + k.key + '$').test(p))) (igroups[k.key] = igroups[k.key] || []).push(f); });
+  }
+  T.forEach(t => say(t.name + ': ' + (groups[t.key] ? groups[t.key].length + ' file xã/phường' : 'KHÔNG tìm thấy')));
+  ISL.forEach(k => say(k.name + ' (chỉ lấy đảo ' + k.label + '): ' + (igroups[k.key] ? igroups[k.key].length + ' file' : 'KHÔNG tìm thấy')));
+  go.disabled = !Object.keys(groups).length;
+};
+go.onclick = async () => {
+  go.disabled = true;
+  const TOL = +document.getElementById('tol').value; let total = 0;
+  for (const t of T) {
+    const fs = groups[t.key]; if (!fs) continue;
+    const feats = [];
+    for (const f of fs) {
+      try {
+        const g = JSON.parse(await f.text());
+        const list = g.type === 'FeatureCollection' ? g.features : g.type === 'Feature' ? [g] : [{ type: 'Feature', properties: {}, geometry: g }];
+        list.forEach(ft => { if (!ft.geometry) return; ft.geometry.coordinates = proc(ft.geometry, TOL); ft.properties = ft.properties || {}; ft.properties._file = f.name.replace(/\.(geo)?json$/i, ''); feats.push(ft); });
+      } catch (err) { say('Lỗi đọc ' + f.name + ': ' + err.message); }
+    }
+    const blob = new Blob([JSON.stringify({ type: 'FeatureCollection', features: feats })], { type: 'application/geo+json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = t.out; a.click(); total += blob.size;
+    say('Đã tạo ' + t.out + ': ' + feats.length + ' xã/phường, ' + (blob.size / 1048576).toFixed(1) + ' MB. Các trường dữ liệu: ' + Object.keys(feats[0] ? feats[0].properties : {}).join(', '));
+    await new Promise(r => setTimeout(r, 800));
+  }
+  const tf = [];
+  for (const t of T) {
+    const f = provs[t.key]; if (!f) { say('Không thấy file ranh giới cả tỉnh ' + t.name); continue; }
+    try {
+      const g = JSON.parse(await f.text());
+      const list = g.type === 'FeatureCollection' ? g.features : g.type === 'Feature' ? [g] : [{ type: 'Feature', properties: {}, geometry: g }];
+      list.forEach(ft => { if (!ft.geometry) return; ft.geometry.coordinates = proc(ft.geometry, TOL / 2); ft.properties = { _tinh: t.name }; tf.push(ft); });
+    } catch (err) { say('Lỗi đọc ' + f.name + ': ' + err.message); }
+  }
+  if (tf.length) {
+    const blob = new Blob([JSON.stringify({ type: 'FeatureCollection', features: tf })], { type: 'application/geo+json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'tinh.geojson'; a.click(); total += blob.size;
+    say('Đã tạo tinh.geojson: ' + tf.length + ' tỉnh, ' + (blob.size / 1048576).toFixed(1) + ' MB.');
+  }
+  const isl = [];
+  for (const k of ISL) {
+    for (const f of (igroups[k.key] || [])) {
+      try {
+        const g = JSON.parse(await f.text());
+        const list = g.type === 'FeatureCollection' ? g.features : g.type === 'Feature' ? [g] : [{ type: 'Feature', properties: {}, geometry: g }];
+        list.forEach(ft => {
+          if (!ft.geometry) return;
+          const txt = norm(f.name + ' ' + Object.values(ft.properties || {}).filter(v => typeof v === 'string').join(' '));
+          if (!k.re.test(txt)) return;
+          ft.geometry.coordinates = proc(ft.geometry, TOL / 2);
+          ft.properties = Object.assign({}, ft.properties, { _tinh: k.name, _file: f.name.replace(/\.(geo)?json$/i, '') });
+          isl.push(ft);
+        });
+      } catch (err) { /* bỏ qua file lỗi */ }
+    }
+  }
+  if (isl.length) {
+    const blob = new Blob([JSON.stringify({ type: 'FeatureCollection', features: isl })], { type: 'application/geo+json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'dao.geojson'; a.click(); total += blob.size;
+    say('Đã tạo dao.geojson: ' + isl.length + ' đơn vị đảo (' + isl.map(f => f.properties._file).join(', ') + ').');
+  }
+  say('Tổng dung lượng các file: ' + (total / 1048576).toFixed(1) + ' MB.');
+  say('Xong. Chép các file vừa tải (3 file xã/phường + tinh.geojson) vào thư mục data/ cạnh index.html.');
+};
+</script></body></html>
