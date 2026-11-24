@@ -10,53 +10,57 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <style>
-html,body{height:100%;margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1f2a2e}
-#map{position:absolute;inset:0}
-.panel{position:fixed;left:0;right:0;bottom:0;background:#fff;box-shadow:0 -2px 12px rgba(0,0,0,.18);padding:10px 10px calc(10px + env(safe-area-inset-bottom,0px));z-index:5}
-#status{font-size:14px;line-height:1.4;min-height:20px;margin:0 2px 8px}
-.chips{display:flex;flex-wrap:wrap;gap:8px 12px;margin:0 2px 8px;font-size:13px}
-.chips label{display:flex;align-items:center;gap:4px}
-.bar{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-button{font:inherit;font-size:14px;padding:11px 4px;border:1px solid #b9c4c7;border-radius:8px;background:#f3f6f6;color:#1f2a2e}
+html,body{height:100%;margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1f2a2e;overflow:hidden}
+#map{position:absolute;inset:0;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+#toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:88%;background:rgba(31,42,46,.93);color:#fff;font-size:14px;line-height:1.4;padding:9px 15px;border-radius:18px;z-index:9;pointer-events:none;opacity:0;transition:opacity .25s;text-align:center}
+#toast.on{opacity:1}
+button{font:inherit;font-size:14px;padding:10px 8px;border:1px solid #b9c4c7;border-radius:8px;background:#f3f6f6;color:#1f2a2e}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #1a73e8;outline-offset:1px}
-button.on{background:#0f766e;border-color:#0f766e;color:#fff}
-.me{width:18px;height:18px;border-radius:50%;background:#1a73e8;border:3px solid #fff;box-shadow:0 0 0 2px rgba(26,115,232,.35)}
-.hq{padding:3px 9px;border-radius:14px;color:#fff;font:700 13px system-ui,sans-serif;box-shadow:0 1px 5px rgba(0,0,0,.5);border:2px solid #fff;white-space:nowrap;cursor:pointer}
+.maplibregl-ctrl-group button{width:44px;height:44px}
+.maplibregl-ctrl-top-right{margin-top:env(safe-area-inset-top,0px)}
+.maplibregl-ctrl-bottom-right{bottom:var(--sh,0px);margin-bottom:env(safe-area-inset-bottom,0px)}
+.lp{position:absolute;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;border:5px solid #1a73e8;box-sizing:border-box;pointer-events:none;z-index:4;animation:lp linear forwards}
+@keyframes lp{from{transform:scale(.25);opacity:.2}to{transform:scale(1);opacity:1}}
+.hqm{position:relative;width:46px;height:46px;cursor:pointer}
+.hqm .ring{width:46px;height:46px;box-sizing:border-box;border-radius:50%;border:4px solid #333;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hqm img{width:28px;height:28px;object-fit:contain}
+.hqm .lb{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:2px;padding:0 7px;border-radius:9px;color:#fff;font:700 12px/18px system-ui,sans-serif;border:1.5px solid #fff;white-space:nowrap}
 .pop{font-size:14px;line-height:1.45;max-width:230px}
 .pop button{margin-top:6px;padding:7px 10px;font-size:13px}
-.rp{position:fixed;left:8px;right:56px;top:calc(8px + env(safe-area-inset-top,0px));max-width:460px;background:#fff;border-radius:10px;box-shadow:0 2px 14px rgba(0,0,0,.25);padding:8px;z-index:6}
-.rp[hidden]{display:none}
+.rp{position:fixed;left:8px;right:62px;top:calc(8px + env(safe-area-inset-top,0px));max-width:460px;background:#fff;border-radius:12px;box-shadow:0 2px 14px rgba(0,0,0,.28);padding:8px;z-index:6}
+.rp[hidden],.sheet[hidden]{display:none}
 .rp-row{display:flex;gap:6px;margin-bottom:6px}
-.rp input,.rp select{flex:1;min-width:0;font:inherit;font-size:14px;padding:9px;border:1px solid #b9c4c7;border-radius:8px}
+.rp input,.rp select{flex:1;min-width:0;font:inherit;font-size:15px;padding:9px;border:1px solid #b9c4c7;border-radius:8px}
 .rp button{padding:9px 10px;font-size:13px}
-#rp-res{max-height:42vh;overflow:auto;font-size:14px;line-height:1.4}
-#rp-res .it{padding:8px 4px;border-top:1px solid #e3e8e9;cursor:pointer}
-#rp-res .msg{padding:2px 4px;color:#44545a}
+#rp-ok{background:#1a73e8;border-color:#1a73e8;color:#fff;font-weight:700;padding:9px 18px}
+#rp-sug{max-height:30vh;overflow:auto;font-size:14px;line-height:1.4}
+#rp-sug .it,#sheet .it{padding:9px 4px;border-top:1px solid #e3e8e9;cursor:pointer}
+#rp-sug .msg{padding:1px 4px 3px;color:#44545a}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-height:42vh;overflow:auto;background:#fff;border-radius:16px 16px 0 0;box-shadow:0 -2px 14px rgba(0,0,0,.25);padding:10px 10px calc(10px + env(safe-area-inset-bottom,0px));z-index:6;font-size:14px;line-height:1.4}
 .alt{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border:2px solid #d5dde0;border-radius:10px;margin:0 0 6px;cursor:pointer}
 .alt.sel{border-color:#1a73e8;background:#e8f0fe}
 .alt b{font-size:17px}
 .alt small{display:block;color:#44545a}
 .alt .tag{display:inline-block;margin-left:6px;padding:0 6px;border-radius:8px;background:#188038;color:#fff;font-size:11px}
 .alt .d{font-weight:700;font-size:16px;white-space:nowrap}
+#ed{position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));background:#fff;border-radius:12px;box-shadow:0 2px 14px rgba(0,0,0,.3);padding:8px;z-index:8}
+#ed textarea{box-sizing:border-box;width:100%;height:118px;font:12px/1.4 ui-monospace,Consolas,monospace;border:1px solid #b9c4c7;border-radius:8px;padding:6px}
+#ed button{margin-top:6px;width:100%}
+#rp-sug .it small,#sheet .it small{display:block;color:#5f6b70}
+#rp-sug .it.srch{color:#1a73e8;font-weight:600}
 .lnk{display:block;width:100%;margin:2px 0 4px}
 </style>
 </head>
 <body>
 <div id="map"></div>
 <div class="rp" id="rp" hidden>
-  <div class="rp-row"><input id="rp-from" placeholder="Điểm đi: gõ tên (VD: K2) hoặc chạm bản đồ" autocomplete="off"><button id="rp-me" aria-label="Dùng vị trí của tôi">Vị trí tôi</button></div>
-  <div class="rp-row"><input id="rp-to" placeholder="Điểm đến: gõ tên hoặc chạm bản đồ" autocomplete="off"><button id="rp-swap" aria-label="Đổi chiều đi và đến">⇅</button></div>
-  <div class="rp-row"><select id="rp-prof" aria-label="Phương tiện"><option value="driving-car">Ô tô</option><option value="cycling-regular">Xe đạp</option><option value="foot-walking">Đi bộ</option></select><button id="rp-clear">Xóa</button><button id="rp-close">Đóng</button></div>
-  <div id="rp-res"></div>
+  <div class="rp-row"><input id="rp-from" placeholder="Điểm đi: chạm bản đồ hoặc gõ tên đường" autocomplete="off" enterkeyhint="search"><button id="rp-me" aria-label="Dùng vị trí của tôi">Vị trí tôi</button></div>
+  <div class="rp-row"><input id="rp-to" placeholder="Điểm đến: gõ tên đường, địa điểm" autocomplete="off" enterkeyhint="search"><button id="rp-swap" aria-label="Đổi chiều đi và đến">⇅</button></div>
+  <div class="rp-row"><select id="rp-prof" aria-label="Phương tiện"><option value="driving-car">Ô tô</option><option value="cycling-regular">Xe đạp</option><option value="foot-walking">Đi bộ</option></select><button id="rp-ok">OK</button><button id="rp-close" aria-label="Đóng">✕</button></div>
+  <div id="rp-sug"></div>
 </div>
-<div class="panel">
-  <p id="status" role="status">Đang tải bản đồ…</p>
-  <div class="chips" id="chips"></div>
-  <div class="bar">
-    <button id="b-locate">Vị trí của tôi</button>
-    <button id="b-route">Tìm đường</button>
-  </div>
-</div>
+<div class="sheet" id="sheet" hidden></div>
+<div id="toast" role="status"></div>
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="config.js"></script>
 <script src="tru-so.js"></script>
@@ -67,13 +71,16 @@ const CONFIG = Object.assign({
   STYLE_URL: 'https://tiles.openfreemap.org/styles/liberty',
   CENTER: [108.4, 12.2], ZOOM: 7, MIN_ZOOM: 6,
   BOUNDS: [[105.5, 9.5], [110.5, 15.0]],
-  SEARCH_BBOX: [106.3, 10.3, 109.7, 14.0]   // khung tìm địa điểm: tây, nam, đông, bắc
+  SEARCH_BBOX: [106.3, 10.3, 109.7, 14.0],   // khung tìm địa điểm: tây, nam, đông, bắc
+  LONGPRESS_MS: 600,                          // thời gian chạm giữ để mở chỉ đường (mili giây)
+  LOGO: 'logo.png'
 }, window.USER_CONFIG || {});
 const HQS = window.HQS || [];
 const EDIT = new URLSearchParams(location.search).has('edit');
 
 const $ = id => document.getElementById(id);
-const say = t => { $('status').textContent = t; };
+let toastT;
+function say(t, ms = 4500) { const el = $('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), ms); }
 const EMPTY = { type: 'FeatureCollection', features: [] };
 
 /*PURE-START*/
@@ -170,11 +177,19 @@ function viaOf(steps) {   // "Qua ..." = tên đường chiếm quãng dài nh�
 }
 /*PURE-END*/
 
-const map = new maplibregl.Map({ container: 'map', style: CONFIG.STYLE_URL, center: CONFIG.CENTER, zoom: CONFIG.ZOOM, minZoom: CONFIG.MIN_ZOOM, maxBounds: CONFIG.BOUNDS });
-map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+const map = new maplibregl.Map({ container: 'map', style: CONFIG.STYLE_URL, center: CONFIG.CENTER, zoom: CONFIG.ZOOM, minZoom: CONFIG.MIN_ZOOM, maxBounds: CONFIG.BOUNDS, pitchWithRotate: false, touchPitch: false });
+map.addControl(new maplibregl.NavigationControl({ showZoom: false, showCompass: true, visualizePitch: false }), 'top-right');   // la bàn: chạm để quay về hướng Bắc ở trên
+const geo = new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: true, timeout: 20000 }, trackUserLocation: true, showUserHeading: true, showAccuracyCircle: true, fitBoundsOptions: { maxZoom: 16 } });
+map.addControl(geo, 'bottom-right');                                                                                              // nút định vị nhỏ như Google Maps
 map.on('error', e => { const msg = (e && e.error && (e.error.message || e.error.status)) || 'không rõ'; console.error('Lỗi bản đồ:', e); say('Lỗi bản đồ: ' + msg); });
 
-let mode = 'idle', watchId = null, meMarker = null, myPos = null;
+let mode = 'idle', myPos = null, lastWard = '', LPFIRED = 0;
+geo.on('geolocate', e => {
+  myPos = [e.coords.longitude, e.coords.latitude];
+  const w = findWard(myPos), n = w ? w._ten + ', ' + w._tinh : '';
+  if (n !== lastWard) { lastWard = n; say(n ? 'Bạn đang ở: ' + n : 'Vị trí của bạn chưa thuộc xã/phường nào trong dữ liệu'); }
+});
+geo.on('error', e => say(e.code === 1 ? 'Bạn chưa cho phép truy cập vị trí. Hãy bật quyền vị trí cho trình duyệt.' : 'Không lấy được vị trí. Thử lại ngoài trời hoặc bật GPS.'));
 
 map.on('load', () => {
   map.addSource('routes', { type: 'geojson', data: EMPTY });
@@ -189,7 +204,7 @@ const PROV = [
   { id: 'khanhhoa', name: 'Khánh Hòa', file: 'data/khanh-hoa.geojson', color: '#ef6c00', dark: '#bf360c' },
   { id: 'daklak', name: 'Đắk Lắk', file: 'data/dak-lak.geojson', color: '#2e7d32', dark: '#1b5e20' }
 ];
-const wardData = {};
+const wardData = {}, PBOX = [];
 const NAME_KEYS = ['name_with_type', 'full_name', 'name', 'Name', 'NAME', 'ten', 'ten_xa', 'ward_name', 'WARD_NAME'];
 function wardName(p) {
   for (const k of NAME_KEYS) if (typeof p[k] === 'string' && p[k]) return p[k];
@@ -201,7 +216,6 @@ function findWard(p) {
   return null;
 }
 async function loadProvinces() {
-  say('Đang tải ranh giới xã/phường…');
   const failed = [];
   for (const pv of PROV) {
     try {
@@ -210,6 +224,7 @@ async function loadProvinces() {
       const g = await r.json();
       g.features.forEach(f => { f.properties = f.properties || {}; f.properties._ten = wardName(f.properties); f.properties._tinh = pv.name; });
       wardData[pv.id] = g.features;
+      const bb = bboxOf(coordsOf(g.features).filter(p => p[0] < 110.5)); PBOX.push([bb[0][0], bb[0][1], bb[1][0], bb[1][1]]);
       map.addSource(pv.id, { type: 'geojson', data: g });
       map.addLayer({ id: pv.id + '-fill', type: 'fill', source: pv.id, paint: { 'fill-color': pv.color, 'fill-opacity': 0.16 } }, 'routes-casing');
       map.addLayer({ id: pv.id + '-line', type: 'line', source: pv.id, paint: { 'line-color': pv.dark, 'line-width': 0.9, 'line-opacity': 0.7 } }, 'routes-casing');
@@ -218,14 +233,8 @@ async function loadProvinces() {
         paint: { 'text-color': '#1f2a2e', 'text-halo-color': '#ffffff', 'text-halo-width': 1.5 } });
     } catch (e) { failed.push(pv.name + ' (' + e.message + ')'); }
   }
-  $('chips').innerHTML = '';
-  PROV.filter(p => wardData[p.id]).forEach(pv => {
-    const l = document.createElement('label');
-    l.innerHTML = '<input type="checkbox" checked> <span style="color:' + pv.dark + ';font-weight:600">' + pv.name + ' (' + wardData[pv.id].length + ')</span>';
-    l.firstChild.onchange = ev => ['fill', 'line', 'label'].forEach(t => map.setLayoutProperty(pv.id + '-' + t, 'visibility', ev.target.checked ? 'visible' : 'none'));
-    $('chips').appendChild(l);
-  });
-  say(failed.length ? 'Chưa tải được: ' + failed.join(', ') + '. Kiểm tra thư mục data/.' : 'Chạm vào ghim K1, K2, K3 hoặc một xã/phường để xem thông tin.');
+  if (failed.length) say('Chưa tải được: ' + failed.join(', ') + '. Kiểm tra thư mục data/.', 20000);
+  else say('Mẹo: chạm giữ ' + Math.round(CONFIG.LONGPRESS_MS / 1000) + ' giây vào một điểm để chỉ đường.', 7000);
 }
 
 /* ===== Chỉ hiện 3 tỉnh: che vùng ngoài, viền tỉnh đậm, tên tỉnh khi thu nhỏ (cần data/tinh.geojson) ===== */
@@ -252,44 +261,105 @@ async function loadTinh() {
     map.addLayer({ id: 'tinh-label', type: 'symbol', source: 'tinh-pts', maxzoom: 10.5,
       layout: { 'text-field': ['get', 'name'], 'text-font': ['Noto Sans Bold'], 'text-transform': 'uppercase', 'text-letter-spacing': 0.08,
         'text-size': ['interpolate', ['linear'], ['zoom'], 5, 14, 7, 20, 10, 26], 'text-allow-overlap': true, 'text-ignore-placement': true },
-      paint: { 'text-color': ['match', ['get', 'name'], 'Lâm Đồng', '#4a148c', 'Khánh Hòa', '#8c2a00', 'Đắk Lắk', '#0d3b12', '#111111'], 'text-halo-color': '#ffffff', 'text-halo-width': 2.5 } });
-    // chỉ giữ phần đất liền: giới hạn khung nhìn, không kéo ra tận các đảo
-    const main = coordsOf(g.features).filter(p => p[0] < 110.5), box = bboxOf(main);
+      paint: { 'text-color': byProv('#4a148c', '#8c2a00', '#0d3b12', '#111111'), 'text-halo-color': '#ffffff', 'text-halo-width': 2.5 } });
+    const main = coordsOf(g.features).filter(p => p[0] < 110.5), box = bboxOf(main);   // chỉ giữ phần đất liền
     map.setMaxBounds([[box[0][0] - 0.3, box[0][1] - 0.3], [box[1][0] + 0.3, box[1][1] + 0.3]]);
     map.fitBounds(box, { padding: 30, animate: false });
-  } catch (e) { console.warn('Không tải được data/tinh.geojson:', e.message); say('Chưa có data/tinh.geojson nên chưa ẩn được vùng ngoài 3 tỉnh.'); }
+  } catch (e) { console.warn('Không tải được data/tinh.geojson:', e.message); say('Chưa có data/tinh.geojson nên chưa ẩn được vùng ngoài 3 tỉnh.', 12000); }
 }
 
-/* ===== Ghim trụ sở K1, K2, K3 (sửa trong tru-so.js) ===== */
+/* ===== Ghim trụ sở K1, K2, K3 có logo viền tròn (sửa vị trí trong tru-so.js) ===== */
 const HQ_COLOR = { 'Lâm Đồng': '#6a1b9a', 'Khánh Hòa': '#bf360c', 'Đắk Lắk': '#1b5e20' };
+function hqElement(h) {
+  const color = h.color || HQ_COLOR[h.tinh] || '#333';
+  const el = document.createElement('div'); el.className = 'hqm';
+  const ring = document.createElement('div'); ring.className = 'ring'; ring.style.borderColor = color;
+  const img = document.createElement('img'); img.src = CONFIG.LOGO; img.alt = ''; ring.appendChild(img);
+  const lb = document.createElement('div'); lb.className = 'lb'; lb.style.background = color; lb.textContent = h.name;
+  el.appendChild(ring); el.appendChild(lb);
+  return el;
+}
 function openHQ(h) {
   const box = document.createElement('div'); box.className = 'pop';
   const t = document.createElement('b'); t.textContent = h.name + ' – ' + (h.ten || h.tinh); box.appendChild(t);
   const w = findWard([h.lng, h.lat]);
   const p = document.createElement('div'); p.textContent = w ? 'Vị trí hiện tại thuộc: ' + w._ten + ', ' + w._tinh : 'Vị trí chưa nằm trong xã/phường nào của dữ liệu'; box.appendChild(p);
   const b = document.createElement('button'); b.textContent = 'Chỉ đường đến đây';
-  b.onclick = () => { pop.remove(); if (mode !== 'route') openRoute(); setPoint('to', [h.lng, h.lat], h.name + ' – ' + (h.ten || h.tinh)); };
+  b.onclick = () => { pop.remove(); toRoute([h.lng, h.lat], h.name + ' – ' + (h.ten || h.tinh)); };
   box.appendChild(b);
-  const pop = new maplibregl.Popup({ offset: 16 }).setLngLat([h.lng, h.lat]).setDOMContent(box).addTo(map);
+  const pop = new maplibregl.Popup({ offset: 30 }).setLngLat([h.lng, h.lat]).setDOMContent(box).addTo(map);
 }
+let edTA = null;
+const edText = () => '// DANH SÁCH TRỤ SỞ (chép toàn bộ nội dung này vào tệp tru-so.js)\nwindow.HQS = [\n' +
+  HQS.map(h => '  { name: ' + JSON.stringify(h.name) + ', tinh: ' + JSON.stringify(h.tinh) + ', ten: ' + JSON.stringify(h.ten || '') + ', lat: ' + (+h.lat).toFixed(6) + ', lng: ' + (+h.lng).toFixed(6) + ' }').join(',\n') + '\n];\n';
 function addHQ() {
   HQS.forEach(h => {
-    const el = document.createElement('div'); el.className = 'hq'; el.style.background = h.color || HQ_COLOR[h.tinh] || '#333'; el.textContent = h.name;
+    const el = hqElement(h);
     const mk = new maplibregl.Marker({ element: el, draggable: EDIT }).setLngLat([h.lng, h.lat]).addTo(map);
     el.addEventListener('click', ev => { ev.stopPropagation(); openHQ(h); });
-    if (EDIT) mk.on('dragend', () => { const q = mk.getLngLat(); h.lng = q.lng; h.lat = q.lat; say(h.name + ' → lat: ' + q.lat.toFixed(6) + ', lng: ' + q.lng.toFixed(6) + ' (chép vào tru-so.js)'); });
+    if (EDIT) mk.on('dragend', () => { const q = mk.getLngLat(); h.lng = q.lng; h.lat = q.lat; if (edTA) edTA.value = edText(); say(h.name + ' đã dời. Bấm “Chép nội dung” khi xong.', 3000); });
   });
-  if (EDIT) say('Chế độ chỉnh ghim: kéo K1, K2, K3 đến đúng chỗ rồi đọc tọa độ ở đây.');
+  if (EDIT) {
+    const box = document.createElement('div'); box.id = 'ed';
+    edTA = document.createElement('textarea'); edTA.readOnly = true; edTA.value = edText();
+    const btn = document.createElement('button'); btn.textContent = 'Chép nội dung';
+    btn.onclick = () => {
+      edTA.select();
+      const ok = () => say('Đã chép. Dán vào tệp tru-so.js trên GitHub.'), no = () => { try { document.execCommand('copy'); ok(); } catch (e) { say('Hãy giữ và chọn Sao chép trong khung chữ.'); } };
+      navigator.clipboard ? navigator.clipboard.writeText(edTA.value).then(ok, no) : no();
+    };
+    box.appendChild(edTA); box.appendChild(btn); document.body.appendChild(box);
+    say('Chế độ chỉnh ghim: kéo K1, K2, K3 đến đúng chỗ.', 8000);
+  }
+}
+
+/* ===== Chạm giữ để mở chỉ đường: điểm đi để trống, điểm đến là điểm vừa chạm ===== */
+let LP = null;
+function lpCancel() { if (LP) { clearTimeout(LP.t); LP.el.remove(); LP = null; } }
+function lpStart(e) {
+  lpCancel();
+  if (EDIT) return;
+  const oe = e.originalEvent;
+  if (oe && oe.touches && oe.touches.length > 1) return;
+  if (oe && oe.type === 'mousedown' && oe.button !== 0) return;
+  const el = document.createElement('div'); el.className = 'lp';
+  el.style.left = e.point.x + 'px'; el.style.top = e.point.y + 'px'; el.style.animationDuration = CONFIG.LONGPRESS_MS + 'ms';
+  $('map').appendChild(el);
+  const ll = e.lngLat;
+  LP = { x: e.point.x, y: e.point.y, el, t: setTimeout(() => { lpCancel(); lpFire(ll); }, CONFIG.LONGPRESS_MS) };
+}
+function lpMove(e) { if (LP && Math.hypot(e.point.x - LP.x, e.point.y - LP.y) > 12) lpCancel(); }
+['touchstart', 'mousedown'].forEach(t => map.on(t, lpStart));
+['touchmove', 'mousemove'].forEach(t => map.on(t, lpMove));
+['touchend', 'touchcancel', 'mouseup', 'dragstart', 'zoomstart', 'rotatestart', 'contextmenu'].forEach(t => map.on(t, lpCancel));
+const pointLabel = (p, w) => 'Điểm chọn' + (w ? ' · ' + w._ten + ', ' + w._tinh : ' trên bản đồ');
+function toRoute(c, label) {   // mở bảng chỉ đường với điểm đến = c
+  if (RP.hidden) setHidden(false);
+  if (mode !== 'route') { openRoute(); RP.from = null; place('from'); }
+  setPoint('to', c, label);
+  if (!RP.from) { RP.active = 'from'; sugText('Chọn điểm đi: chạm bản đồ, gõ tên, hoặc bấm “Vị trí tôi”. Sau đó bấm OK.'); }
+}
+function lpFire(ll) {
+  const p = [ll.lng, ll.lat], w = findWard(p);
+  if (!w && Object.keys(wardData).length) { say('Chỉ chọn được điểm trong 3 tỉnh Lâm Đồng, Khánh Hòa, Đắk Lắk.'); return; }
+  LPFIRED = Date.now();
+  if (navigator.vibrate) navigator.vibrate(30);
+  toRoute(p, pointLabel(p, w));
 }
 
 map.on('click', e => {
+  if (Date.now() - LPFIRED < 900) return;   // bỏ qua cú "click" sinh ra khi nhả tay sau khi chạm giữ
   const p = [e.lngLat.lng, e.lngLat.lat];
   if (mode === 'route') {
     const hit = map.queryRenderedFeatures([[e.point.x - 9, e.point.y - 9], [e.point.x + 9, e.point.y + 9]], { layers: ['routes-line'] })[0];
-    if (hit) { RP.sel = hit.properties.i; showRoutes(false); return; }
+    if (RP.routes.length) {   // đã có đường: chạm bất kỳ đâu để ẩn menu, chạm đường xanh để hiện lại
+      if (RP.hidden) { if (hit && hit.properties.sel === 1) setHidden(false); return; }
+      if (hit && hit.properties.sel !== 1) { RP.sel = hit.properties.i; showRoutes(false); return; }   // chạm đường xám = chọn tuyến đó
+      setHidden(true); return;
+    }
     const w = findWard(p);
-    if (!w && Object.keys(wardData).length) { rpText('Chỉ chọn được điểm trong 3 tỉnh Lâm Đồng, Khánh Hòa, Đắk Lắk.'); return; }
-    setPoint(RP.active, p, 'Điểm chọn' + (w ? ' · ' + w._ten + ', ' + w._tinh : ' trên bản đồ'));
+    if (!w && Object.keys(wardData).length) { sugText('Chỉ chọn được điểm trong 3 tỉnh Lâm Đồng, Khánh Hòa, Đắk Lắk.'); return; }
+    setPoint(RP.active, p, pointLabel(p, w));
   } else {
     const layers = PROV.map(q => q.id + '-fill').filter(l => map.getLayer(l));
     const f = map.queryRenderedFeatures(e.point, { layers })[0];
@@ -297,10 +367,19 @@ map.on('click', e => {
   }
 });
 
-/* ===== Tìm đường kiểu Google Maps: nhiều lựa chọn, km và thời gian, hướng dẫn từng bước ===== */
-const RP = { from: null, to: null, active: 'from', mk: {}, timer: null, routes: [], sel: 0, steps: false };
-const rpClear = () => { $('rp-res').textContent = ''; };
-function rpText(t) { rpClear(); const d = document.createElement('div'); d.className = 'msg'; d.textContent = t; $('rp-res').appendChild(d); }
+/* ===== Chỉ đường kiểu Google Maps: bấm OK mới tìm, nhiều lựa chọn, km và thời gian, hướng dẫn từng bước ===== */
+const RP = { from: null, to: null, active: 'from', mk: {}, timer: null, routes: [], sel: 0, steps: false, hidden: false, seq: 0 };
+const sugClear = () => { $('rp-sug').textContent = ''; };
+function sugText(t) { sugClear(); const d = document.createElement('div'); d.className = 'msg'; d.textContent = t; $('rp-sug').appendChild(d); }
+function sheetShow(on) { $('sheet').hidden = !on; document.documentElement.style.setProperty('--sh', on ? $('sheet').offsetHeight + 'px' : '0px'); }
+function setHidden(h) {   // ẩn/hiện menu chỉ đường; khi ẩn chỉ còn đường màu xanh đang được chỉ dẫn
+  RP.hidden = h;
+  $('rp').hidden = h;
+  sheetShow(!h && RP.routes.length > 0);
+  const f = h ? ['==', ['get', 'sel'], 1] : null;
+  ['routes-casing', 'routes-line'].forEach(id => map.setFilter(id, f));
+  if (h) say('Chạm vào đường màu xanh để mở lại menu.', 3500);
+}
 function place(k) {
   const v = RP[k];
   $('rp-' + k).value = v ? v.label : '';
@@ -308,74 +387,117 @@ function place(k) {
   if (!RP.mk[k]) RP.mk[k] = new maplibregl.Marker({ color: k === 'from' ? '#188038' : '#d93025' });
   RP.mk[k].setLngLat(v.c).addTo(map);
 }
-function setMode(m) { mode = m; $('b-route').classList.toggle('on', m === 'route'); }
+function clearResults() { RP.routes = []; map.getSource('routes') && map.getSource('routes').setData(EMPTY); sheetShow(false); }
+function hint() { sugText(RP.from && RP.to ? 'Bấm OK để tìm đường.' : 'Chọn tiếp điểm ' + (RP.from ? 'đến' : 'đi') + ' (chạm bản đồ hoặc gõ tên).'); }
 function setPoint(k, c, label) {
-  RP[k] = { c, label }; place(k);
-  if (k === 'from' && !RP.to) RP.active = 'to';
-  if (RP.from && RP.to) getRoute(); else rpText('Chọn tiếp điểm ' + (RP.from ? 'đến' : 'đi') + ' (gõ tên hoặc chạm bản đồ).');
+  RP[k] = { c, label }; place(k); clearResults();
+  if (k === 'from' && !RP.to) RP.active = 'to'; else if (k === 'to' && !RP.from) RP.active = 'from';
+  hint();
 }
-function clearRoute() {
-  RP.from = RP.to = null; RP.active = 'from'; RP.routes = []; place('from'); place('to');
-  map.getSource('routes') && map.getSource('routes').setData(EMPTY);
+function openRoute() { mode = 'route'; if (RP.hidden) setHidden(false); $('rp').hidden = false; }
+function closeRoute() {
+  RP.hidden = false; ['routes-casing', 'routes-line'].forEach(id => map.setFilter(id, null));
+  $('rp').hidden = true; mode = 'idle'; RP.from = RP.to = null; RP.active = 'from'; place('from'); place('to'); clearResults(); sugClear();
 }
-function openRoute() { setMode('route'); $('rp').hidden = false; rpText('Gõ tên địa điểm (VD: K2) hoặc chạm lên bản đồ để chọn điểm đi và điểm đến.'); }
-function closeRoute() { $('rp').hidden = true; setMode('idle'); clearRoute(); rpClear(); }
-$('b-route').onclick = () => { if (mode === 'route') closeRoute(); else openRoute(); };
 $('rp-close').onclick = closeRoute;
-$('rp-clear').onclick = () => { clearRoute(); rpText('Đã xóa. Chọn điểm đi và điểm đến mới.'); };
+$('rp-ok').onclick = () => { if (!RP.from || !RP.to) { hint(); return; } getRoute(); };
+$('rp-swap').onclick = () => { const a = RP.from; RP.from = RP.to; RP.to = a; place('from'); place('to'); clearResults(); hint(); };
+$('rp-prof').onchange = () => { if (RP.routes.length) getRoute(); };
+$('rp-me').onclick = () => {
+  const use = c => setPoint('from', c, 'Vị trí của tôi');
+  if (myPos) { use(myPos); return; }
+  if (!navigator.geolocation) { sugText('Thiết bị không hỗ trợ định vị.'); return; }
+  sugText('Đang lấy vị trí…');
+  navigator.geolocation.getCurrentPosition(p => use([p.coords.longitude, p.coords.latitude]), () => sugText('Không lấy được vị trí. Hãy cho phép quyền vị trí.'), { enableHighAccuracy: true, timeout: 15000 });
+};
 
-function localHits(q) {
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+/*GEO-START*/
+const allBox = () => PBOX.length ? [Math.min(...PBOX.map(b => b[0])), Math.min(...PBOX.map(b => b[1])), Math.max(...PBOX.map(b => b[2])), Math.max(...PBOX.map(b => b[3]))] : CONFIG.SEARCH_BBOX;
+function localHits(q) {   // trụ sở và xã/phường: tìm ngay trên máy, không cần mạng
   const nq = norm(q.trim()); if (!nq) return [];
-  return HQS.filter(h => norm(h.name + ' ' + (h.ten || '') + ' ' + h.tinh).includes(nq)).map(h => ({ name: h.name + ' – ' + (h.ten || h.tinh), c: [h.lng, h.lat] }));
+  const out = HQS.filter(h => norm(h.name + ' ' + (h.ten || '') + ' ' + h.tinh).includes(nq)).map(h => ({ title: h.name + ' – ' + (h.ten || h.tinh), sub: 'Trụ sở', c: [h.lng, h.lat] }));
+  if (nq.length >= 2) {
+    let n = 0;
+    for (const id in wardData) for (const f of wardData[id]) {
+      if (n >= 6 || !norm(f.properties._ten).includes(nq)) continue;
+      const g = f.geometry, polys = g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : [];
+      if (polys.length) { n++; out.push({ title: f.properties._ten, sub: 'Xã/phường · ' + f.properties._tinh, c: labelPoint(polys) }); }
+    }
+  }
+  return out;
+}
+async function nomi(q, box) {
+  const [w, s, e, n] = box;
+  const r = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=40&accept-language=vi&countrycodes=vn&bounded=1&viewbox=' + [w, n, e, s].join(',') + '&q=' + encodeURIComponent(q));
+  if (!r.ok) throw new Error('nominatim ' + r.status);
+  return (await r.json()).map(x => ({ title: String(x.display_name).split(', ')[0], c: [+x.lon, +x.lat] }));
+}
+async function photon(q, box) {
+  const r = await fetch('https://photon.komoot.io/api/?limit=20&bbox=' + box.join(',') + '&q=' + encodeURIComponent(q));
+  if (!r.ok) throw new Error('photon ' + r.status);
+  return (await r.json()).features.map(f => { const p = f.properties || {}; return { title: p.name || p.street || '', c: f.geometry.coordinates }; }).filter(x => x.title);
 }
 async function geocode(q) {
-  const [w, s, e, n] = CONFIG.SEARCH_BBOX;
-  const keep = list => list.filter(x => Object.keys(wardData).length ? findWard(x.c) : true);
-  try {
-    const r = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&accept-language=vi&countrycodes=vn&bounded=1&viewbox=' + [w, n, e, s].join(',') + '&q=' + encodeURIComponent(q));
-    if (r.ok) { const out = keep((await r.json()).map(x => ({ name: x.display_name.split(', ').slice(0, 4).join(', '), c: [+x.lon, +x.lat] }))); if (out.length) return out; }
-  } catch (err) { /* thử nguồn dự phòng */ }
-  try {
-    const r = await fetch('https://photon.komoot.io/api/?limit=8&bbox=' + [w, s, e, n].join(',') + '&q=' + encodeURIComponent(q));
-    if (r.ok) return keep((await r.json()).features.map(f => { const p = f.properties || {}; return { name: [p.name || p.street, p.district, p.city, p.state].filter(Boolean).join(', '), c: f.geometry.coordinates }; }));
-  } catch (err) { /* hết nguồn */ }
-  return [];
+  const seen = new Set(), out = []; let raw = 0;
+  const add = list => {
+    raw += list.length;
+    list.forEach(x => {
+      const w = findWard(x.c);
+      if (!w && Object.keys(wardData).length) return;   // chỉ giữ kết quả nằm trong 3 tỉnh
+      const k = x.c[0].toFixed(4) + ',' + x.c[1].toFixed(4);
+      if (seen.has(k)) return; seen.add(k);
+      x.sub = w ? w._ten + ', ' + w._tinh : ''; out.push(x);
+    });
+  };
+  const variants = [q];
+  if (!/^(duong|pho|quoc lo|ql|tinh lo|tl|hem|ngo|dai lo)\b/.test(norm(q))) variants.push('Đường ' + q);
+  for (const v of variants) {
+    try { add(await nomi(v, allBox())); } catch (e) { /* thử tiếp */ }
+    for (const box of PBOX) { if (out.length >= 3) break; await sleep(1100); try { add(await nomi(v, box)); } catch (e) { /* thử tiếp */ } }   // từng tỉnh một, cách nhau hơn 1 giây theo quy định của Nominatim
+    if (out.length < 3) (await Promise.allSettled(PBOX.map(b => photon(v, b)))).forEach(r => { if (r.status === 'fulfilled') add(r.value); });
+    if (out.length) break;
+  }
+  const c = map.getCenter(), d2 = x => (x.c[0] - c.lng) ** 2 + (x.c[1] - c.lat) ** 2;
+  out.sort((a, b) => d2(a) - d2(b));   // ưu tiên kết quả gần khu vực đang xem
+  return { list: out.slice(0, 10), raw };
 }
-function showList(k, list) {
-  rpClear();
+/*GEO-END*/
+function showList(k, list, withSearch) {
+  sugClear();
+  const q = $('rp-' + k).value.trim();
+  if (withSearch && q.length >= 2) {
+    const d = document.createElement('div'); d.className = 'it srch'; d.textContent = '🔍 Tìm “' + q + '” trên bản đồ'; d.onclick = () => suggest(k, q);
+    $('rp-sug').appendChild(d);
+  }
   list.forEach(x => {
-    const d = document.createElement('div'); d.className = 'it'; d.textContent = x.name;
-    d.onclick = () => { setPoint(k, x.c, x.name); map.easeTo({ center: x.c, zoom: Math.max(map.getZoom(), 12) }); };
-    $('rp-res').appendChild(d);
+    const d = document.createElement('div'); d.className = 'it';
+    const t = document.createElement('div'); t.textContent = x.title; d.appendChild(t);
+    if (x.sub) { const m = document.createElement('small'); m.textContent = x.sub; d.appendChild(m); }
+    d.onclick = () => { setPoint(k, x.c, x.title + (x.sub ? ' · ' + x.sub : '')); map.easeTo({ center: x.c, zoom: Math.max(map.getZoom(), 13) }); };
+    $('rp-sug').appendChild(d);
   });
 }
 async function suggest(k, q) {
   if (q.length < 2) return;
-  const loc = localHits(q);
-  if (!loc.length) rpText('Đang tìm “' + q + '”…');
-  const list = loc.concat(await geocode(q));
-  if (!list.length) { rpText('Không tìm thấy “' + q + '” trong 3 tỉnh. Thử tên khác hoặc chạm lên bản đồ.'); return; }
-  showList(k, list);
+  const my = ++RP.seq;
+  sugText('Đang tìm “' + q + '”… (có thể mất vài giây)');
+  const loc = localHits(q), { list, raw } = await geocode(q);
+  if (my !== RP.seq) return;   // đã có lần tìm mới hơn
+  const all = loc.concat(list);
+  if (!all.length) { sugText(raw ? 'Có ' + raw + ' kết quả trên OpenStreetMap nhưng đều nằm ngoài 3 tỉnh.' : 'OpenStreetMap chưa có “' + q + '” trong khu vực. Thử viết khác (thêm “Đường”, bỏ dấu…) hoặc chạm lên bản đồ.'); return; }
+  showList(k, all, false);
 }
 ['from', 'to'].forEach(k => {
   const el = $('rp-' + k);
   el.onfocus = () => { RP.active = k; };
   el.oninput = () => {
-    clearTimeout(RP.timer); const q = el.value.trim();
-    const loc = localHits(q); if (loc.length) showList(k, loc);
-    if (q.length >= 3) RP.timer = setTimeout(() => suggest(k, q), 800);
+    const q = el.value.trim();
+    if (!q) { RP[k] = null; if (RP.mk[k]) { RP.mk[k].remove(); delete RP.mk[k]; } clearResults(); hint(); return; }
+    showList(k, localHits(q), true);   // khi gõ chỉ gợi ý trụ sở và xã/phường; tìm đường phố thì bấm Enter hoặc dòng “Tìm trên bản đồ”
   };
-  el.onkeydown = ev => { if (ev.key === 'Enter') { clearTimeout(RP.timer); suggest(k, el.value.trim()); } };
+  el.onkeydown = ev => { if (ev.key === 'Enter') { ev.preventDefault(); suggest(k, el.value.trim()); } };
 });
-$('rp-me').onclick = () => {
-  const use = c => setPoint('from', c, 'Vị trí của tôi');
-  if (myPos) { use(myPos); return; }
-  if (!navigator.geolocation) { rpText('Thiết bị không hỗ trợ định vị.'); return; }
-  rpText('Đang lấy vị trí…');
-  navigator.geolocation.getCurrentPosition(p => use([p.coords.longitude, p.coords.latitude]), () => rpText('Không lấy được vị trí. Hãy cho phép quyền vị trí.'), { enableHighAccuracy: true, timeout: 15000 });
-};
-$('rp-swap').onclick = () => { const a = RP.from; RP.from = RP.to; RP.to = a; place('from'); place('to'); if (RP.from && RP.to) getRoute(); };
-$('rp-prof').onchange = () => { if (RP.from && RP.to) getRoute(); };
 
 /* --- lấy tuyến: OpenRouteService (có tuyến thay thế dưới ~100 km), tuyến dài ô tô dùng OSRM để có nhiều lựa chọn --- */
 async function orsRoutes(prof, alt) {
@@ -409,7 +531,7 @@ async function osrmRoutes() {
 }
 async function getRoute() {
   const prof = $('rp-prof').value, hasKey = CONFIG.ORS_API_KEY && !CONFIG.ORS_API_KEY.startsWith('DÁN');
-  rpText('Đang tìm đường…');
+  sugText('Đang tìm đường…');
   let routes = null;
   try {
     if (!hasKey && prof === 'driving-car') routes = await osrmRoutes();
@@ -417,17 +539,19 @@ async function getRoute() {
   } catch (e) {
     if (e.alt) {   // tuyến dài hơn giới hạn tuyến thay thế của ORS
       if (prof === 'driving-car') { try { routes = await osrmRoutes(); } catch (e2) { /* thử ORS 1 tuyến */ } }
-      if (!routes) { try { routes = await orsRoutes(prof, false); } catch (e3) { rpText('Không tìm được đường: ' + e3.message); return; } }
-    } else { rpText('Không tìm được đường: ' + e.message); return; }
+      if (!routes) { try { routes = await orsRoutes(prof, false); } catch (e3) { sugText('Không tìm được đường: ' + e3.message); return; } }
+    } else { sugText('Không tìm được đường: ' + e.message); return; }
   }
-  RP.routes = routes.sort((a, b) => a.dur - b.dur).slice(0, 3); RP.sel = 0; RP.steps = false;
+  const kept = [];
+  routes.sort((a, b) => a.dur - b.dur).forEach(r => { if (!kept.some(k => Math.abs(k.dist - r.dist) / k.dist < 0.015 && Math.abs(k.dur - r.dur) / k.dur < 0.03)) kept.push(r); });   // bỏ tuyến gần như trùng nhau
+  RP.routes = kept.slice(0, 3); RP.sel = 0; RP.steps = false;
+  sugClear();
   showRoutes(true);
 }
 function showRoutes(fit) {
-  const R = RP.routes;
+  const R = RP.routes, sh = $('sheet');
   map.getSource('routes').setData({ type: 'FeatureCollection', features: R.map((r, i) => ({ type: 'Feature', properties: { i, sel: i === RP.sel ? 1 : 0 }, geometry: { type: 'LineString', coordinates: r.coords } })) });
-  if (fit) map.fitBounds(bboxOf(R.flatMap(r => r.coords)), { padding: { top: 260, bottom: 200, left: 40, right: 60 }, maxZoom: 16 });
-  rpClear();
+  sh.textContent = '';
   const shortest = R.reduce((m, r, i) => r.dist < R[m].dist ? i : m, 0);
   R.forEach((r, i) => {
     const c = document.createElement('div'); c.className = 'alt' + (i === RP.sel ? ' sel' : '');
@@ -440,37 +564,20 @@ function showRoutes(fit) {
     const d = document.createElement('div'); d.className = 'd'; d.textContent = fmtD(r.dist);
     c.appendChild(l); c.appendChild(d);
     c.onclick = () => { RP.sel = i; showRoutes(false); };
-    $('rp-res').appendChild(c);
+    sh.appendChild(c);
   });
-  if (R.length === 1) rpText2('Chỉ tìm được 1 tuyến cho hành trình này.');
+  if (R.length === 1) { const m = document.createElement('div'); m.className = 'msg'; m.textContent = 'Chỉ tìm được 1 tuyến cho hành trình này.'; sh.appendChild(m); }
   const tg = document.createElement('button'); tg.className = 'lnk'; tg.textContent = RP.steps ? 'Ẩn hướng dẫn từng bước' : 'Xem hướng dẫn từng bước';
   tg.onclick = () => { RP.steps = !RP.steps; showRoutes(false); };
-  $('rp-res').appendChild(tg);
+  sh.appendChild(tg);
   if (RP.steps) R[RP.sel].steps.forEach(s => {
     const d = document.createElement('div'); d.className = 'it'; d.textContent = s.t + (s.end ? '' : ' · ' + fmtD(s.d));
     d.onclick = () => map.easeTo({ center: s.c, zoom: 16 });
-    $('rp-res').appendChild(d);
+    sh.appendChild(d);
   });
+  sheetShow(!RP.hidden);
+  if (fit) map.fitBounds(bboxOf(R.flatMap(r => r.coords)), { padding: { top: 220, bottom: Math.round(sh.offsetHeight + 30), left: 40, right: 70 }, maxZoom: 16 });
 }
-function rpText2(t) { const d = document.createElement('div'); d.className = 'msg'; d.textContent = t; $('rp-res').appendChild(d); }
-
-/* ===== Định vị ===== */
-$('b-locate').onclick = () => {
-  const btn = $('b-locate');
-  if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; meMarker && meMarker.remove(); meMarker = null; myPos = null; btn.classList.remove('on'); say('Đã tắt định vị.'); return; }
-  if (!navigator.geolocation) { say('Thiết bị này không hỗ trợ định vị.'); return; }
-  btn.classList.add('on'); say('Đang tìm vị trí…');
-  let first = true;
-  watchId = navigator.geolocation.watchPosition(pos => {
-    myPos = [pos.coords.longitude, pos.coords.latitude];
-    if (!meMarker) { const el = document.createElement('div'); el.className = 'me'; meMarker = new maplibregl.Marker({ element: el }); meMarker.setLngLat(myPos).addTo(map); }
-    meMarker.setLngLat(myPos);
-    if (first) { map.easeTo({ center: myPos, zoom: Math.max(map.getZoom(), 15) }); first = false; }
-    const w = findWard(myPos);
-    say((w ? 'Bạn đang ở: ' + w._ten + ', ' + w._tinh : 'Chưa thuộc xã/phường nào trong dữ liệu') + ' (±' + Math.round(pos.coords.accuracy) + ' m).');
-  }, err => { btn.classList.remove('on'); watchId = null; say(err.code === 1 ? 'Bạn chưa cho phép truy cập vị trí. Hãy bật quyền vị trí cho trình duyệt.' : 'Không lấy được vị trí. Thử lại ngoài trời hoặc bật GPS.'); },
-  { enableHighAccuracy: true, maximumAge: 2000, timeout: 20000 });
-};
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>

@@ -3,7 +3,7 @@
 // (dạng "12.7000, 108.0450": số đầu là lat, số sau là lng). Dán vào lat và lng bên dưới.
 // Mẹo: mở trang kèm ?edit=1 (ví dụ .../Map/?edit=1) để kéo ghim và đọc tọa độ ở thanh trạng thái.
 window.HQS = [
-  { name: 'K1', tinh: 'Khánh Hòa', ten: 'Trụ sở K1 (Tây Nha Trang)',          lat: 12.2700, lng: 109.1400 },
-  { name: 'K2', tinh: 'Đắk Lắk',   ten: 'Trụ sở K2 (Tân An, Buôn Ma Thuột)',  lat: 12.7000, lng: 108.0450 },
-  { name: 'K3', tinh: 'Lâm Đồng',  ten: 'Trụ sở K3 (Đức Trọng)',              lat: 11.7350, lng: 108.3720 }
+  { name: 'D1', tinh: 'Khánh Hòa', ten: 'Trụ sở K1 (Tây Nha Trang)',          lat: 12.2700, lng: 109.1400 },
+  { name: 'D2', tinh: 'Đắk Lắk',   ten: 'Trụ sở K2 (Tân An, Buôn Ma Thuột)',  lat: 12.698944, lng: 108.072306},
+  { name: 'D3', tinh: 'Lâm Đồng',  ten: 'Trụ sở K3 (Đức Trọng)',              lat: 11.7570, lng: 108.3136 }
 ];
