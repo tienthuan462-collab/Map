@@ -24,7 +24,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .maplibregl-ctrl-bottom-right{bottom:var(--sh,0px);margin-bottom:env(safe-area-inset-bottom,0px)}
 .lp{position:absolute;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;border:5px solid #1a73e8;box-sizing:border-box;pointer-events:none;z-index:4;animation:lp linear forwards}
 @keyframes lp{from{transform:scale(.25);opacity:.2}to{transform:scale(1);opacity:1}}
-.hqm{position:relative;width:46px;height:46px;cursor:pointer}
+.hqm{width:46px;height:46px;cursor:pointer}   /* không đặt position: MapLibre tự đặt position:absolute để ghim bám đúng tọa độ */
 .hqm .ring{width:46px;height:46px;box-sizing:border-box;border-radius:50%;border:4px solid #333;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;overflow:hidden}
 .hqm img{width:28px;height:28px;object-fit:contain}
 .hqm .lb{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:2px;padding:0 7px;border-radius:9px;color:#fff;font:700 12px/18px system-ui,sans-serif;border:1.5px solid #fff;white-space:nowrap}
@@ -58,6 +58,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 #loading small{font-size:13px;color:#5f6b70;max-width:300px}
 .spin{width:44px;height:44px;border:5px solid #cfd8dc;border-top-color:#0f766e;border-radius:50%;animation:sp .9s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
+.cal{border-top:1px dashed #b9c4c7;margin-top:8px;padding-top:8px;font-size:13px}
+.cal .out{white-space:pre-line;margin:4px 0}
+.cal input{width:84px;font:inherit;font-size:14px;padding:6px;border:1px solid #b9c4c7;border-radius:8px}
+.cal button{padding:6px 10px;font-size:13px;margin:2px 4px 2px 0}
 .lnk{display:block;width:100%;margin:2px 0 4px}
 </style>
 </head>
@@ -67,7 +71,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 <div class="rp" id="rp" hidden>
   <div class="rp-row"><input id="rp-from" placeholder="Điểm đi: chạm bản đồ hoặc gõ tên đường" autocomplete="off" enterkeyhint="search"><button id="rp-me" aria-label="Dùng vị trí của tôi">Vị trí tôi</button></div>
   <div class="rp-row"><input id="rp-to" placeholder="Điểm đến: gõ tên đường, địa điểm" autocomplete="off" enterkeyhint="search"><button id="rp-swap" aria-label="Đổi chiều đi và đến">⇅</button></div>
-  <div class="rp-row"><select id="rp-prof" aria-label="Phương tiện"><option value="driving-car">Ô tô</option><option value="cycling-regular">Xe đạp</option><option value="foot-walking">Đi bộ</option></select><button id="rp-ok">OK</button><button id="rp-close" aria-label="Đóng">✕</button></div>
+  <div class="rp-row"><select id="rp-prof" aria-label="Phương tiện"><option value="driving-car">Ô tô</option><option value="moto">Xe máy</option><option value="cycling-regular">Xe đạp</option><option value="foot-walking">Đi bộ</option></select><button id="rp-ok">OK</button><button id="rp-close" aria-label="Đóng">✕</button></div>
   <div id="rp-sug"></div>
 </div>
 <div class="sheet" id="sheet" hidden></div>
@@ -84,8 +88,12 @@ const CONFIG = Object.assign({
   BOUNDS: [[105.5, 9.5], [110.5, 15.0]],
   SEARCH_BBOX: [106.3, 10.3, 109.7, 14.0],   // khung tìm địa điểm: tây, nam, đông, bắc
   LONGPRESS_MS: 3000,                          // thời gian chạm giữ để mở chỉ đường (mili giây)
-  LOGO: 'logo.png'
+  LOGO: 'logo.png',
+  MOTO_TOP_SPEED: 60                           // tốc độ tối đa giả định cho xe máy (km/h)
 }, window.USER_CONFIG || {});
+CONFIG.ETA_FACTOR = Object.assign({ car: 1, moto: 1, bike: 1, foot: 1 }, (window.USER_CONFIG || {}).ETA_FACTOR);   // hệ số chỉnh thời gian theo thực tế (hiệu chuẩn bằng ?cal=1)
+CONFIG.MOTO_TOP_SPEED = CONFIG.MOTO_TOP_SPEED || 60;
+const CAL = new URLSearchParams(location.search).has('cal');
 const HQS = window.HQS || [];
 const EDIT = new URLSearchParams(location.search).has('edit');
 const loadMsg = t => { const el = document.getElementById('load-sub'); if (el) el.textContent = t; };
@@ -230,6 +238,29 @@ function mergeRoutes(base, lists, max = 8) {   // gộp, bỏ tuyến trùng, x�
   lists.forEach(l => l.forEach(r => { if (!all.some(k => sameRoute(k, r))) all.push(r); }));
   return all.sort((a, b) => a.dur - b.dur).slice(0, max);
 }
+function decodePoly(str, prec = 6) {   // giải mã đường đi dạng polyline của Valhalla
+  let i = 0, lat = 0, lng = 0; const out = [], f = Math.pow(10, prec);
+  while (i < str.length) {
+    let b, shift = 0, res = 0;
+    do { b = str.charCodeAt(i++) - 63; res |= (b & 31) << shift; shift += 5; } while (b >= 32);
+    lat += (res & 1) ? ~(res >> 1) : res >> 1;
+    shift = 0; res = 0;
+    do { b = str.charCodeAt(i++) - 63; res |= (b & 31) << shift; shift += 5; } while (b >= 32);
+    lng += (res & 1) ? ~(res >> 1) : res >> 1;
+    out.push([lng / f, lat / f]);
+  }
+  return out;
+}
+function viVal(m) {   // bước chỉ đường của Valhalla
+  const nm = (m.street_names || [])[0] || '', on = nm ? ' vào ' + nm : '', along = nm ? ' trên ' + nm : '';
+  const T = { 1: 'Xuất phát' + along, 2: 'Xuất phát' + along, 3: 'Xuất phát' + along, 4: 'Đã đến nơi', 5: 'Đã đến nơi', 6: 'Đã đến nơi', 7: 'Đi tiếp' + along, 8: 'Đi tiếp' + along,
+    9: 'Chếch sang phải' + on, 10: 'Rẽ phải' + on, 11: 'Rẽ phải gắt' + on, 12: 'Quay đầu xe', 13: 'Quay đầu xe', 14: 'Rẽ trái gắt' + on, 15: 'Rẽ trái' + on, 16: 'Chếch sang trái' + on,
+    17: 'Đi thẳng vào đường dẫn' + on, 18: 'Rẽ phải vào đường dẫn' + on, 19: 'Rẽ trái vào đường dẫn' + on, 20: 'Ra khỏi đường bên phải' + on, 21: 'Ra khỏi đường bên trái' + on,
+    22: 'Đi thẳng' + along, 23: 'Đi sát bên phải' + on, 24: 'Đi sát bên trái' + on, 25: 'Nhập làn' + on, 26: 'Vào vòng xuyến' + (m.roundabout_exit_count ? ', ra lối thứ ' + m.roundabout_exit_count : ''),
+    27: 'Ra khỏi vòng xuyến' + on, 28: 'Lên phà', 29: 'Rời phà', 36: 'Nhập làn bên trái' + on, 37: 'Nhập làn bên phải' + on };
+  return T[m.type] || m.instruction || 'Tiếp tục';
+}
+function median(a) { const s = [...a].sort((x, y) => x - y), n = s.length; return n ? (n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2) : 0; }
 /*PURE-END*/
 
 const map = new maplibregl.Map({ container: 'map', style: CONFIG.STYLE_URL, center: CONFIG.CENTER, zoom: CONFIG.ZOOM, minZoom: 3, maxBounds: CONFIG.BOUNDS, pitchWithRotate: false, touchPitch: false });
@@ -446,7 +477,7 @@ map.on('click', e => {
 });
 
 /* ===== Chỉ đường kiểu Google Maps: bấm OK mới tìm, nhiều lựa chọn, km và thời gian, hướng dẫn từng bước ===== */
-const RP = { from: null, to: null, active: 'from', mk: {}, timer: null, routes: [], sel: 0, steps: false, hidden: false, seq: 0, expanded: false };
+const RP = { from: null, to: null, active: 'from', mk: {}, timer: null, routes: [], sel: 0, steps: false, hidden: false, seq: 0, rseq: 0, expanded: false, cal: null };
 const sugClear = () => { $('rp-sug').textContent = ''; };
 function sugText(t) { sugClear(); const d = document.createElement('div'); d.className = 'msg'; d.textContent = t; $('rp-sug').appendChild(d); }
 function sheetShow(on) { $('sheet').hidden = !on; document.documentElement.style.setProperty('--sh', on ? $('sheet').offsetHeight + 'px' : '0px'); }
@@ -577,9 +608,12 @@ async function suggest(k, q) {
   el.onkeydown = ev => { if (ev.key === 'Enter') { ev.preventDefault(); suggest(k, el.value.trim()); } };
 });
 
-/* --- lấy tuyến: trước hết chỉ lấy tuyến NHANH NHẤT (nhanh); các tuyến khác chỉ lấy khi người dùng bấm "Chọn tuyến khác" --- */
+/* --- lấy tuyến: trước hết chỉ lấy tuyến NHANH NHẤT; các tuyến khác lấy khi người dùng bấm "Chọn tuyến khác" --- */
 const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('quá thời gian chờ')), ms))]);
 const hasKey = () => CONFIG.ORS_API_KEY && !CONFIG.ORS_API_KEY.startsWith('DÁN');
+const modeKey = () => ({ 'driving-car': 'car', 'moto': 'moto', 'cycling-regular': 'bike', 'foot-walking': 'foot' }[$('rp-prof').value] || 'car');
+const F = () => CONFIG.ETA_FACTOR[modeKey()] || 1;
+const mkRoute = (coords, dist, raw, steps) => ({ coords, dist, raw, dur: raw * F(), steps, via: viaOf(steps) });   // raw = thời gian gốc của nguồn tính; dur = sau khi nhân hệ số hiệu chuẩn
 async function orsRoutes(prof, extra) {
   if (!hasKey()) throw new Error('Chưa có API key. Mở tệp config.js và dán key HeiGIT vào.');
   const body = Object.assign({ coordinates: [RP.from.c, RP.to.c], radiuses: [-1, -1], instructions: true, language: 'en' }, extra || {});
@@ -592,7 +626,7 @@ async function orsRoutes(prof, extra) {
   return d.features.map(f => {
     const coords = f.geometry.coordinates, sm = f.properties.summary;
     const steps = ((f.properties.segments || [])[0] || { steps: [] }).steps.map(s => ({ t: viStep(s), d: s.distance, n: s.name, c: coords[s.way_points[0]], end: s.type === 10 }));
-    return { coords, dist: sm.distance, dur: sm.duration, steps, via: viaOf(steps) };
+    return mkRoute(coords, sm.distance, sm.duration, steps);
   });
 }
 async function osrmRoutes(alt) {
@@ -602,41 +636,112 @@ async function osrmRoutes(alt) {
   if (d.code !== 'Ok') throw new Error(d.message || d.code);
   return d.routes.map(x => {
     const steps = x.legs.flatMap(l => l.steps).map(s => ({ t: viOsrm(s), d: s.distance, n: s.name || s.ref || '', c: s.maneuver.location, end: s.maneuver.type === 'arrive' }));
-    return { coords: x.geometry.coordinates, dist: x.distance, dur: x.duration, steps, via: viaOf(steps) };
+    return mkRoute(x.geometry.coordinates, x.distance, x.duration, steps);
+  });
+}
+async function valRoutes(costing, alt) {   // Valhalla (máy chủ demo FOSSGIS): có chế độ xe máy; chỉ dùng để thử nghiệm
+  const o = RP.from.c, d = RP.to.c;
+  const body = { locations: [{ lat: o[1], lon: o[0] }, { lat: d[1], lon: d[0] }], costing, directions_options: { units: 'kilometers', language: 'en-US' } };
+  if (costing === 'motorcycle') body.costing_options = { motorcycle: { use_highways: 0, top_speed: CONFIG.MOTO_TOP_SPEED } };   // xe máy không được đi cao tốc
+  if (alt) body.alternates = 3;
+  const r = await fetch('https://valhalla1.openstreetmap.de/route', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => null);
+  if (!r.ok || !j || !j.trip) throw new Error((j && (j.error || j.error_code)) || 'Valhalla mã lỗi ' + r.status);
+  return [j.trip].concat((j.alternates || []).map(x => x.trip)).map(t => {
+    const leg = t.legs[0], coords = decodePoly(leg.shape);
+    const steps = leg.maneuvers.map(m => ({ t: viVal(m), d: m.length * 1000, n: (m.street_names || [])[0] || '', c: coords[Math.min(m.begin_shape_index, coords.length - 1)], end: [4, 5, 6].includes(m.type) }));
+    return mkRoute(coords, t.summary.length * 1000, t.summary.time, steps);
   });
 }
 async function fastestRoute() {
   const prof = $('rp-prof').value;
-  let firstErr = null;
+  if (prof === 'moto') return (await withTimeout(valRoutes('motorcycle', false), 12000))[0];
+  let err = null;
   if (hasKey()) {
-    try { return (await withTimeout(orsRoutes(prof, {}), 9000))[0]; } catch (e) { firstErr = e; }
-  } else firstErr = new Error('Chưa có API key. Mở tệp config.js và dán key HeiGIT vào.');
-  if (prof !== 'driving-car') throw firstErr;
-  try { return (await withTimeout(osrmRoutes(false), 9000))[0]; } catch (e) { throw firstErr; }   // ô tô: dự phòng bằng OSRM
+    try { return (await withTimeout(orsRoutes(prof, prof === 'driving-car' ? { preference: 'fastest' } : {}), 9000))[0]; } catch (e) { err = e; }   // preference "fastest": mặc định của ORS là "recommended" nên có thể không phải tuyến nhanh nhất
+  } else err = new Error('Chưa có API key. Mở tệp config.js và dán key HeiGIT vào.');
+  if (prof !== 'driving-car') throw err;
+  try { return (await withTimeout(osrmRoutes(false), 9000))[0]; } catch (e) { throw err; }   // ô tô: dự phòng bằng OSRM
 }
 async function getRoute() {
   sugText('Đang tìm đường nhanh nhất…');
-  RP.expanded = false; const my = ++RP.seq;
+  RP.expanded = false; RP.cal = null; const my = ++RP.rseq;
   let base;
-  try { base = await fastestRoute(); } catch (e) { sugText('Không tìm được đường: ' + e.message); return; }
-  if (my !== RP.seq) return;
+  try { base = await fastestRoute(); } catch (e) { if (my === RP.rseq) sugText('Không tìm được đường: ' + e.message); return; }
+  if (my !== RP.rseq) return;
   RP.routes = [base]; RP.sel = 0; RP.steps = false;
   sugClear(); showRoutes(true);
 }
 async function moreRoutes() {   // lấy thêm nhiều tuyến khác, xếp từ nhanh đến chậm
-  const base = RP.routes[0], prof = $('rp-prof').value, car = prof === 'driving-car';
+  const base = RP.routes[0], prof = $('rp-prof').value, car = prof === 'driving-car', fast = car ? { preference: 'fastest' } : {};
   const btn = document.querySelector('#sheet .more'); if (btn) { btn.textContent = 'Đang tìm thêm tuyến…'; btn.disabled = true; }
   const jobs = [];
-  if (hasKey()) {
-    jobs.push(orsRoutes(prof, { alternative_routes: { target_count: 3, share_factor: 0.6, weight_factor: 1.6 } }));   // ORS chỉ cho tuyến thay thế dưới ~100 km
-    jobs.push(orsRoutes(prof, { preference: 'shortest' }));
-    if (car) { jobs.push(orsRoutes(prof, { options: { avoid_features: ['highways'] } })); jobs.push(orsRoutes(prof, { options: { avoid_features: ['tollways'] } })); }
+  if (prof === 'moto') jobs.push(valRoutes('motorcycle', true));
+  else {
+    if (hasKey()) {
+      jobs.push(orsRoutes(prof, Object.assign({ alternative_routes: { target_count: 3, share_factor: 0.6, weight_factor: 1.6 } }, fast)));   // ORS chỉ cho tuyến thay thế dưới ~100 km
+      jobs.push(orsRoutes(prof, { preference: 'shortest' }));
+      if (car) { jobs.push(orsRoutes(prof, { preference: 'fastest', options: { avoid_features: ['highways'] } })); jobs.push(orsRoutes(prof, { preference: 'fastest', options: { avoid_features: ['tollways'] } })); }
+    }
+    if (car) jobs.push(osrmRoutes(true).then(l => { const o = l.find(r => sameRoute(base, r)); const ref = o ? base.dur / o.raw : F(); l.forEach(r => { r.dur = r.raw * ref; }); return l; }));   // quy đổi thời gian OSRM về cùng thang với tuyến gốc
   }
-  if (car) jobs.push(osrmRoutes(true).then(l => { const o = l.find(r => sameRoute(base, r)); const k = o ? base.dur / o.dur : 1; l.forEach(r => { r.dur *= k; }); return l; }));   // quy đổi thời gian OSRM về cùng thang với tuyến gốc
+  const rid = RP.rseq;
   const res = await Promise.allSettled(jobs.map(j => withTimeout(j, 14000)));
-  if (!RP.routes.length || RP.routes[0] !== base && !RP.routes.includes(base)) return;   // người dùng đã đổi hành trình
+  if (rid !== RP.rseq || !RP.routes.includes(base)) return;   // người dùng đã đổi hành trình
   RP.routes = mergeRoutes(base, res.filter(r => r.status === 'fulfilled').map(r => r.value));
   RP.sel = RP.routes.indexOf(base); RP.expanded = true; showRoutes(true);
+}
+
+/* --- Hiệu chuẩn thời gian bằng cách so với Google Maps (mở trang với ?cal=1) --- */
+const calLoad = () => { try { return JSON.parse(localStorage.getItem('cal') || '[]'); } catch (e) { return []; } };
+async function calCompare() {
+  const moto = $('rp-prof').value === 'moto', res = {};
+  const jobs = moto ? [['Valhalla xe máy', () => valRoutes('motorcycle', false)]]
+    : [['ORS ô tô', () => orsRoutes('driving-car', { preference: 'fastest' })], ['OSRM ô tô', () => osrmRoutes(false)], ['Valhalla ô tô', () => valRoutes('auto', false)]];
+  for (const [name, fn] of jobs) {
+    try { const r = (await withTimeout(fn(), 12000))[0]; res[name] = { min: r.raw / 60, km: r.dist / 1000 }; } catch (e) { res[name] = { err: e.message }; }
+    if (name.startsWith('Valhalla')) await sleep(1100);
+  }
+  return res;
+}
+function calSummary() {
+  const S = calLoad(), L = [S.length + ' mẫu đã lưu'];
+  ['car', 'moto'].forEach(m => {
+    const sm = S.filter(x => x.mode === m); if (!sm.length) return;
+    const names = new Set(); sm.forEach(x => Object.keys(x.eng).forEach(n => names.add(n)));
+    names.forEach(n => { const r = sm.filter(x => x.eng[n]).map(x => x.g / x.eng[n]); L.push((m === 'car' ? 'Ô tô' : 'Xe máy') + ' · ' + n + ': Google ÷ nguồn ≈ ' + median(r).toFixed(2) + ' (' + r.length + ' mẫu)'); });
+  });
+  return L.join('\n');
+}
+function calPanel() {
+  const box = document.createElement('div'); box.className = 'cal';
+  const add = (tag, txt, cls) => { const e = document.createElement(tag); if (txt) e.textContent = txt; if (cls) e.className = cls; box.appendChild(e); return e; };
+  add('b', 'Hiệu chuẩn thời gian (chế độ ?cal=1)');
+  const lines = () => RP.cal ? Object.entries(RP.cal).map(([n, v]) => n + ': ' + (v.err ? 'lỗi ' + v.err : Math.round(v.min) + ' phút · ' + v.km.toFixed(1) + ' km')).join('\n') : 'Bấm “So sánh các nguồn”, rồi mở Google Maps cùng hành trình để nhập số của Google.';
+  const out = add('div', lines(), 'out');
+  const b1 = add('button', 'So sánh các nguồn');
+  b1.onclick = async () => { b1.disabled = true; out.textContent = 'Đang hỏi các nguồn (khoảng 5 giây)…'; RP.cal = await calCompare(); out.textContent = lines(); b1.disabled = false; };
+  const row = add('div'); row.append('Google: ');
+  const gm = document.createElement('input'); gm.type = 'number'; gm.placeholder = 'phút'; gm.inputMode = 'numeric';
+  const gk = document.createElement('input'); gk.type = 'number'; gk.placeholder = 'km'; gk.step = '0.1'; gk.inputMode = 'decimal';
+  row.append(gm, ' ', gk, ' ');
+  const sv = document.createElement('button'); sv.textContent = 'Lưu mẫu'; row.appendChild(sv);
+  const sum = add('div', calSummary(), 'out');
+  sv.onclick = () => {
+    if (!RP.cal || !(+gm.value > 0)) { sum.textContent = 'Hãy bấm “So sánh các nguồn” và nhập số phút của Google trước.'; return; }
+    const eng = {}, km = {}; Object.entries(RP.cal).forEach(([n, v]) => { if (!v.err) { eng[n] = v.min; km[n] = v.km; } });
+    const S = calLoad(); S.push({ mode: modeKey(), g: +gm.value, gkm: +gk.value || null, eng, km, from: RP.from.c, to: RP.to.c }); localStorage.setItem('cal', JSON.stringify(S));
+    sum.textContent = calSummary(); gm.value = gk.value = '';
+  };
+  const cp = add('button', 'Chép kết quả');
+  cp.onclick = () => { const txt = calSummary() + '\n' + localStorage.getItem('cal'); navigator.clipboard ? navigator.clipboard.writeText(txt).then(() => say('Đã chép kết quả hiệu chuẩn.'), () => say('Không chép được.')) : say('Trình duyệt không cho chép.'); };
+  const cl = add('button', 'Xóa mẫu'); cl.onclick = () => { localStorage.removeItem('cal'); sum.textContent = calSummary(); };
+  return box;
+}
+function gmapsUrl() {
+  const m = { 'driving-car': 'driving', 'moto': 'two-wheeler', 'cycling-regular': 'bicycling', 'foot-walking': 'walking' }[$('rp-prof').value] || 'driving';
+  const p = c => c[1].toFixed(6) + ',' + c[0].toFixed(6);
+  return 'https://www.google.com/maps/dir/?api=1&origin=' + p(RP.from.c) + '&destination=' + p(RP.to.c) + '&travelmode=' + m;
 }
 function showRoutes(fit) {
   const R = RP.routes, sh = $('sheet');
@@ -646,7 +751,7 @@ function showRoutes(fit) {
   R.forEach((r, i) => {
     const c = document.createElement('div'); c.className = 'alt' + (i === RP.sel ? ' sel' : '');
     const l = document.createElement('div'), b = document.createElement('b'), sm = document.createElement('small');
-    b.textContent = fmtT(r.dur);
+    b.textContent = '~' + fmtT(r.dur);
     if (i === 0) { const t = document.createElement('span'); t.className = 'tag'; t.textContent = 'Nhanh nhất'; b.appendChild(t); }
     else if (i === shortest) { const t = document.createElement('span'); t.className = 'tag'; t.style.background = '#1a73e8'; t.textContent = 'Ngắn nhất'; b.appendChild(t); }
     const diff = i > 0 ? Math.round((r.dur - R[0].dur) / 60) : 0;
@@ -660,6 +765,8 @@ function showRoutes(fit) {
   if (!RP.expanded) {
     const mb = document.createElement('button'); mb.className = 'lnk more'; mb.textContent = 'Chọn tuyến khác'; mb.onclick = moreRoutes; sh.appendChild(mb);
   } else if (R.length === 1) { const m = document.createElement('div'); m.className = 'msg'; m.textContent = 'Không tìm thấy tuyến nào khác cho hành trình này.'; sh.appendChild(m); }
+  const gb = document.createElement('button'); gb.className = 'lnk'; gb.textContent = 'Mở trong Google Maps (giờ có tính kẹt xe, dẫn đường bằng giọng nói)';
+  gb.onclick = () => window.open(gmapsUrl(), '_blank', 'noopener'); sh.appendChild(gb);
   const tg = document.createElement('button'); tg.className = 'lnk'; tg.textContent = RP.steps ? 'Ẩn hướng dẫn từng bước' : 'Xem hướng dẫn từng bước';
   tg.onclick = () => { RP.steps = !RP.steps; showRoutes(false); };
   sh.appendChild(tg);
@@ -668,6 +775,8 @@ function showRoutes(fit) {
     d.onclick = () => map.easeTo({ center: s.c, zoom: 16 });
     sh.appendChild(d);
   });
+  const note = document.createElement('div'); note.className = 'msg'; note.style.fontSize = '12px'; note.textContent = 'Thời gian là ước tính theo tốc độ trung bình của từng loại đường, chưa tính kẹt xe và đèn giao thông.'; sh.appendChild(note);
+  if (CAL) sh.appendChild(calPanel());
   sheetShow(!RP.hidden);
   if (fit) map.fitBounds(bboxOf(R.flatMap(r => r.coords)), { padding: { top: 220, bottom: Math.round(sh.offsetHeight + 30), left: 40, right: 70 }, maxZoom: 16 });
 }
