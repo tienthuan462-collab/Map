@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f766e">
-<title>Bản đồ nội bộ</title>
+<title>Bản Đồ Trung Đoàn E07 </title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="preconnect" href="https://api.heigit.org">
+<link rel="preconnect" href="https://rsapi.goong.io">
 <link rel="preconnect" href="https://router.project-osrm.org">
 <link rel="preconnect" href="https://tiles.openfreemap.org">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
@@ -22,14 +22,53 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .maplibregl-ctrl-group button{width:44px;height:44px}
 .maplibregl-ctrl-top-right{margin-top:env(safe-area-inset-top,0px)}
 .maplibregl-ctrl-bottom-right{bottom:var(--sh,0px);margin-bottom:env(safe-area-inset-bottom,0px)}
-.lp{position:absolute;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;border:5px solid #1a73e8;box-sizing:border-box;pointer-events:none;z-index:4;animation:lp linear forwards}
-@keyframes lp{from{transform:scale(.25);opacity:.2}to{transform:scale(1);opacity:1}}
-.hqm{width:46px;height:46px;cursor:pointer}   /* không đặt position: MapLibre tự đặt position:absolute để ghim bám đúng tọa độ */
-.hqm .ring{width:46px;height:46px;box-sizing:border-box;border-radius:50%;border:4px solid #333;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;overflow:hidden}
-.hqm img{width:28px;height:28px;object-fit:contain}
+.hqm{width:30px;height:30px;cursor:pointer}   /* không đặt position: MapLibre tự đặt position:absolute để ghim bám đúng tọa độ */
+.hqm .ring{width:30px;height:30px;box-sizing:border-box;border-radius:50%;border:2px solid #333;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hqm img{width:16px;height:16px;object-fit:contain}
 .hqm .lb{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:2px;padding:0 7px;border-radius:9px;color:#fff;font:700 12px/18px system-ui,sans-serif;border:1.5px solid #fff;white-space:nowrap}
-.pop{font-size:14px;line-height:1.45;max-width:230px}
-.pop button{margin-top:6px;padding:7px 10px;font-size:13px}
+
+/* Nút "Lớp" + bảng chọn lớp (UBND...) */
+#lyr-btn{position:fixed;right:10px;top:calc(64px + env(safe-area-inset-top,0px));z-index:5;width:44px;height:44px;padding:0;border:0;border-radius:8px;background:#fff;box-shadow:0 0 0 2px rgba(0,0,0,.12);display:flex;align-items:center;justify-content:center}
+#lyr-btn svg{width:26px;height:26px;fill:#37474f}
+#lyr-btn.on{background:#0f766e}
+#lyr-btn.on svg{fill:#fff}
+#lyr{position:fixed;right:10px;top:calc(116px + env(safe-area-inset-top,0px));z-index:7;width:min(290px,calc(100vw - 20px));max-height:60vh;overflow:auto;background:#fff;border-radius:12px;box-shadow:0 2px 14px rgba(0,0,0,.3);padding:6px 10px 10px}
+#lyr[hidden]{display:none}
+.lyr-h{font-weight:700;font-size:15px;padding:8px 0 4px}
+.lyr-it{display:flex;align-items:center;gap:10px;min-height:48px;border-top:1px solid #e3e8e9;font-size:15px}
+.lyr-it input{width:24px;height:24px;flex:none;accent-color:#0f766e}
+.lyr-it .dt{width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #999;flex:none}
+.lyr-it span:nth-of-type(2){flex:1}
+.lyr-it small{color:#5f6b70}
+#lyr-off{width:100%;margin-top:6px}
+
+/* Logo D1/D2/D3/E07 luôn nằm trên mọi thứ khác */
+.hqm{z-index:5}
+
+.tip{pointer-events:none}
+.tip .maplibregl-popup-content{padding:0;overflow:hidden;border-radius:10px;box-shadow:0 3px 12px rgba(0,0,0,.35)}
+.tipc{border-left:6px solid #dc2626;padding:8px 12px;font-size:13px;color:#5f6b70}
+.tipc b{display:block;font-size:15px;color:#1f2a2e}
+/* Thẻ thông tin (popup): dải màu đầu thẻ, tên to, nhãn tỉnh, nút lớn */
+.pcard .maplibregl-popup-content{padding:0;min-width:240px;border-radius:14px;overflow:hidden;box-shadow:0 4px 22px rgba(0,0,0,.38)}
+.pcard .maplibregl-popup-close-button{color:#fff;font-size:26px;width:38px;height:38px;line-height:32px;border-radius:0 14px 0 0}
+.pcard .maplibregl-popup-close-button:hover{background:rgba(0,0,0,.18)}
+.pc-h{display:flex;align-items:center;gap:10px;padding:12px 42px 12px 12px;color:#fff}
+.pc-logo{width:46px;height:46px;flex:none;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px rgba(255,255,255,.45)}
+.pc-logo img{width:30px;height:30px;object-fit:contain}
+.pc-t small{display:block;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;opacity:.92}
+.pc-t b{display:block;font-size:19px;line-height:1.25}
+.pc-t i{display:block;font-style:normal;font-size:13px;line-height:1.3;opacity:.95;margin-top:2px}
+.pc-b{padding:10px 12px 12px}
+.pc-chip{display:inline-block;color:#fff;font-size:12px;font-weight:700;padding:3px 11px;border-radius:12px}
+.pc-line{margin-top:7px;font-size:13px;line-height:1.4;color:#44545a}
+.lyr-fn{display:block;width:100%;text-align:left;margin-top:6px;padding:10px;font-weight:700}
+.lyr-fn small{display:block;color:#5f6b70;font-weight:400}
+.pop{font-size:14px;line-height:1.45;max-width:240px}
+.pop button,.pc-b button{display:block;width:100%;margin-top:6px;padding:10px;font-size:14px}
+.pri{background:#1a73e8;border-color:#1a73e8;color:#fff;font-weight:700}
+#rp-near{flex:1;background:#fff3e0;border-color:#ef6c00;color:#7a3500;font-weight:700}
+.alt .rk{display:inline-block;min-width:22px;margin-right:6px;text-align:center;border-radius:50%;background:#1f2a2e;color:#fff;font-size:13px}
 .rp{position:fixed;left:8px;right:62px;top:calc(8px + env(safe-area-inset-top,0px));max-width:460px;background:#fff;border-radius:12px;box-shadow:0 2px 14px rgba(0,0,0,.28);padding:8px;z-index:6}
 .rp[hidden],.sheet[hidden]{display:none}
 .rp-row{display:flex;gap:6px;margin-bottom:6px}
@@ -71,9 +110,12 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 <div class="rp" id="rp" hidden>
   <div class="rp-row"><input id="rp-from" placeholder="Điểm đi: chạm bản đồ hoặc gõ tên đường" autocomplete="off" enterkeyhint="search"><button id="rp-me" aria-label="Dùng vị trí của tôi">Vị trí tôi</button></div>
   <div class="rp-row"><input id="rp-to" placeholder="Điểm đến: gõ tên đường, địa điểm" autocomplete="off" enterkeyhint="search"><button id="rp-swap" aria-label="Đổi chiều đi và đến">⇅</button></div>
-  <div class="rp-row"><select id="rp-prof" aria-label="Phương tiện"><option value="driving-car">Ô tô</option><option value="moto">Xe máy</option><option value="cycling-regular">Xe đạp</option><option value="foot-walking">Đi bộ</option></select><button id="rp-ok">OK</button><button id="rp-close" aria-label="Đóng">✕</button></div>
+  <div class="rp-row"><select id="rp-prof" aria-label="Phương tiện"><option value="driving-car">Ô tô</option><option value="moto">Xe máy</option></select><button id="rp-ok">OK</button><button id="rp-close" aria-label="Đóng">✕</button></div>
+  <div class="rp-row"><button id="rp-near">★ Đơn vị gần nhất (D1, D2, D3)</button></div>
   <div id="rp-sug"></div>
 </div>
+<button id="lyr-btn" aria-label="Menu: lớp bản đồ và chức năng" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z"/></svg></button>
+<div id="lyr" hidden></div>
 <div class="sheet" id="sheet" hidden></div>
 <div id="toast" role="status"></div>
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
@@ -81,19 +123,26 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 <script src="tru-so.js"></script>
 <script>
 const CONFIG = Object.assign({
-  ORS_API_KEY: '',
-  ORS_BASE: 'https://api.heigit.org/openrouteservice',
+  GOONG_API_KEY: '',                           // khóa REST API của Goong (dán trong config.js)
+  GOONG_BASE: 'https://rsapi.goong.io',
+  GOONG_MOTO_VEHICLE: 'bike',                  // loại xe gửi cho Goong khi chọn "Xe máy" (car | bike | taxi | truck | hd): nên đối chiếu với Google Maps
+  AUTOCOMPLETE_ON_TYPE: true,                  // true: vừa gõ vừa gợi ý bằng Goong (tốn lượt gọi); false: chỉ tìm khi bấm Enter
   STYLE_URL: 'https://tiles.openfreemap.org/styles/liberty',
   CENTER: [108.4, 12.2], ZOOM: 7, MIN_ZOOM: 6,
   BOUNDS: [[105.5, 9.5], [110.5, 15.0]],
   SEARCH_BBOX: [106.3, 10.3, 109.7, 14.0],   // khung tìm địa điểm: tây, nam, đông, bắc
-  LONGPRESS_MS: 3000,                          // thời gian chạm giữ để mở chỉ đường (mili giây)
   LOGO: 'logo.png',
-  MOTO_TOP_SPEED: 60                           // tốc độ tối đa giả định cho xe máy (km/h)
+  NEAREST_UNITS: ['D1', 'D2', 'D3'],           // các đơn vị được so sánh khi bấm "Đơn vị gần nhất" (khớp với name trong tru-so.js)
+  // DANH SÁCH LỚP trong nút "Lớp". Muốn thêm lớp mới: thêm 1 dòng, rồi đặt kieu tương ứng cho các điểm trong tru-so.js
+  // (ví dụ lớp khu công nghiệp: { id: 'kcn', name: 'Khu công nghiệp', kieu: 'kcn', color: '#2e7d32' }). Bỏ "tinh" nếu muốn gộp mọi tỉnh vào một lớp.
+  LAYERS: [
+    { id: 'ub-dl', name: 'Ủy ban Đắk Lắk',   kieu: 'rieng', tinh: 'Đắk Lắk',   color: '#dc2626' },
+    { id: 'ub-kh', name: 'Ủy ban Khánh Hòa', kieu: 'rieng', tinh: 'Khánh Hòa', color: '#dc2626' },
+    { id: 'ub-ld', name: 'Ủy ban Lâm Đồng',  kieu: 'rieng', tinh: 'Lâm Đồng',  color: '#dc2626' },
+    // Chấm xanh khu công nghiệp: thêm điểm vào tru-so.js với kieu: 'kcn' là tự hiện (xem mẫu cuối tệp tru-so.js)
+    { id: 'kcn', name: 'Khu công nghiệp', kieu: 'kcn', color: '#16a34a', dark: '#14532d' }
+  ],
 }, window.USER_CONFIG || {});
-CONFIG.ETA_FACTOR = Object.assign({ car: 1, moto: 1, bike: 1, foot: 1 }, (window.USER_CONFIG || {}).ETA_FACTOR);   // hệ số chỉnh thời gian theo thực tế (hiệu chuẩn bằng ?cal=1)
-CONFIG.MOTO_TOP_SPEED = CONFIG.MOTO_TOP_SPEED || 60;
-const CAL = new URLSearchParams(location.search).has('cal');
 const HQS = window.HQS || [];
 const EDIT = new URLSearchParams(location.search).has('edit');
 const loadMsg = t => { const el = document.getElementById('load-sub'); if (el) el.textContent = t; };
@@ -162,41 +211,14 @@ function bboxOf(pts) {
 const norm = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase();
 const fmtD = m => m < 1000 ? Math.max(10, Math.round(m / 10) * 10) + ' m' : (m / 1000).toFixed(m < 100000 ? 1 : 0) + ' km';
 const fmtT = s => { const m = Math.max(1, Math.round(s / 60)); return m >= 60 ? Math.floor(m / 60) + ' giờ ' + (m % 60) + ' phút' : m + ' phút'; };
-function viStep(s) {   // bước chỉ đường của OpenRouteService
-  const nm = s.name && s.name !== '-' ? s.name : '', on = nm ? ' vào ' + nm : '';
-  switch (s.type) {
-    case 0: return 'Rẽ trái' + on;
-    case 1: return 'Rẽ phải' + on;
-    case 2: return 'Rẽ trái gắt' + on;
-    case 3: return 'Rẽ phải gắt' + on;
-    case 4: return 'Chếch sang trái' + on;
-    case 5: return 'Chếch sang phải' + on;
-    case 6: return 'Đi thẳng' + (nm ? ' trên ' + nm : '');
-    case 7: return 'Vào vòng xuyến' + (s.exit_number ? ', ra lối thứ ' + s.exit_number : '');
-    case 8: return 'Ra khỏi vòng xuyến' + on;
-    case 9: return 'Quay đầu xe';
-    case 10: return 'Đã đến nơi';
-    case 11: return 'Xuất phát' + (nm ? ' trên ' + nm : '');
-    case 12: return 'Đi sát bên trái' + on;
-    case 13: return 'Đi sát bên phải' + on;
-    default: return s.instruction || 'Tiếp tục';
-  }
-}
-function viOsrm(s) {   // bước chỉ đường của OSRM
-  const m = s.maneuver || {}, nm = s.name || s.ref || '', on = nm ? ' vào ' + nm : '';
-  const dir = { 'left': 'trái', 'right': 'phải', 'slight left': 'chếch trái', 'slight right': 'chếch phải', 'sharp left': 'trái gắt', 'sharp right': 'phải gắt' }[m.modifier] || '';
-  switch (m.type) {
-    case 'depart': return 'Xuất phát' + (nm ? ' trên ' + nm : '');
-    case 'arrive': return 'Đã đến nơi';
-    case 'roundabout': case 'rotary': case 'roundabout turn': return 'Vào vòng xuyến' + (m.exit ? ', ra lối thứ ' + m.exit : '');
-    case 'exit roundabout': case 'exit rotary': return 'Ra khỏi vòng xuyến' + on;
-    case 'fork': return 'Ở ngã ba, đi ' + (dir || 'tiếp') + on;
-    case 'merge': return 'Nhập làn' + on;
-    case 'on ramp': return 'Vào đường dẫn' + on;
-    case 'off ramp': return 'Ra khỏi đường dẫn' + on;
-    case 'continue': case 'new name': return 'Đi tiếp' + (nm ? ' trên ' + nm : '');
-    default: return m.modifier === 'uturn' ? 'Quay đầu xe' : dir ? 'Rẽ ' + dir + on : 'Đi thẳng' + (nm ? ' trên ' + nm : '');
-  }
+function viGoong(s) {   // bước chỉ đường của Goong (định dạng giống Google: html_instructions + maneuver)
+  const txt = String(s.html_instructions || '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+  if (txt) return txt;   // Goong thường đã trả sẵn câu hướng dẫn
+  const M = { 'turn-left': 'Rẽ trái', 'turn-right': 'Rẽ phải', 'turn-slight-left': 'Chếch sang trái', 'turn-slight-right': 'Chếch sang phải',
+    'turn-sharp-left': 'Rẽ trái gắt', 'turn-sharp-right': 'Rẽ phải gắt', 'uturn-left': 'Quay đầu xe', 'uturn-right': 'Quay đầu xe', 'straight': 'Đi thẳng',
+    'roundabout-left': 'Vào vòng xuyến', 'roundabout-right': 'Vào vòng xuyến', 'merge': 'Nhập làn', 'ramp-left': 'Vào đường dẫn', 'ramp-right': 'Vào đường dẫn',
+    'fork-left': 'Ở ngã ba, đi trái', 'fork-right': 'Ở ngã ba, đi phải' };
+  return M[s.maneuver] || 'Tiếp tục';
 }
 function viaOf(steps) {   // "Qua ..." = tên đường chiếm quãng dài nhất
   let best = null;
@@ -209,36 +231,7 @@ function trimIslands(f, maxLng = 110.5) {   // bỏ phần đảo xa (kinh độ
   if (g.type === 'Polygon') return g.coordinates[0][0][0] < maxLng;
   return false;
 }
-const RAD = Math.PI / 180;
-function dM(a, b) { const x = (b[0] - a[0]) * RAD * Math.cos((a[1] + b[1]) / 2 * RAD), y = (b[1] - a[1]) * RAD; return Math.hypot(x, y) * 6371000; }
-function densify(c, step) {
-  const out = [];
-  for (let i = 0; i < c.length - 1; i++) {
-    const a = c[i], b = c[i + 1], n = Math.max(1, Math.ceil(dM(a, b) / step));
-    for (let k = 0; k < n; k++) out.push([a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n]);
-  }
-  out.push(c[c.length - 1]);
-  return out;
-}
-function gridOf(pts) {
-  const g = new Map();
-  pts.forEach(p => { const k = Math.floor(p[0] / 0.002) + ',' + Math.floor(p[1] / 0.002); if (!g.has(k)) g.set(k, []); g.get(k).push(p); });
-  return g;
-}
-function nearGrid(g, p, tol) {
-  const cx = Math.floor(p[0] / 0.002), cy = Math.floor(p[1] / 0.002);
-  for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) { const arr = g.get((cx + i) + ',' + (cy + j)); if (arr && arr.some(q => dM(p, q) < tol)) return true; }
-  return false;
-}
-function prep(r) { if (!r.grid) { r.grid = gridOf(densify(r.coords, 100)); r.samp = densify(r.coords, 400); } return r; }
-function overlap(a, b) { prep(a); prep(b); let hit = 0; a.samp.forEach(p => { if (nearGrid(b.grid, p, 200)) hit++; }); return hit / a.samp.length; }
-const sameRoute = (a, b) => Math.min(overlap(a, b), overlap(b, a)) >= 0.88;   // trùng nhau từ 88% quãng đường trở lên
-function mergeRoutes(base, lists, max = 8) {   // gộp, bỏ tuyến trùng, xếp theo thời gian từ nhanh đến chậm
-  const all = [prep(base)];
-  lists.forEach(l => l.forEach(r => { if (!all.some(k => sameRoute(k, r))) all.push(r); }));
-  return all.sort((a, b) => a.dur - b.dur).slice(0, max);
-}
-function decodePoly(str, prec = 6) {   // giải mã đường đi dạng polyline của Valhalla
+function decodePoly(str, prec = 5) {   // giải mã polyline của Goong (kiểu Google: 5 chữ số thập phân)
   let i = 0, lat = 0, lng = 0; const out = [], f = Math.pow(10, prec);
   while (i < str.length) {
     let b, shift = 0, res = 0;
@@ -251,16 +244,6 @@ function decodePoly(str, prec = 6) {   // giải mã đường đi dạng polyli
   }
   return out;
 }
-function viVal(m) {   // bước chỉ đường của Valhalla
-  const nm = (m.street_names || [])[0] || '', on = nm ? ' vào ' + nm : '', along = nm ? ' trên ' + nm : '';
-  const T = { 1: 'Xuất phát' + along, 2: 'Xuất phát' + along, 3: 'Xuất phát' + along, 4: 'Đã đến nơi', 5: 'Đã đến nơi', 6: 'Đã đến nơi', 7: 'Đi tiếp' + along, 8: 'Đi tiếp' + along,
-    9: 'Chếch sang phải' + on, 10: 'Rẽ phải' + on, 11: 'Rẽ phải gắt' + on, 12: 'Quay đầu xe', 13: 'Quay đầu xe', 14: 'Rẽ trái gắt' + on, 15: 'Rẽ trái' + on, 16: 'Chếch sang trái' + on,
-    17: 'Đi thẳng vào đường dẫn' + on, 18: 'Rẽ phải vào đường dẫn' + on, 19: 'Rẽ trái vào đường dẫn' + on, 20: 'Ra khỏi đường bên phải' + on, 21: 'Ra khỏi đường bên trái' + on,
-    22: 'Đi thẳng' + along, 23: 'Đi sát bên phải' + on, 24: 'Đi sát bên trái' + on, 25: 'Nhập làn' + on, 26: 'Vào vòng xuyến' + (m.roundabout_exit_count ? ', ra lối thứ ' + m.roundabout_exit_count : ''),
-    27: 'Ra khỏi vòng xuyến' + on, 28: 'Lên phà', 29: 'Rời phà', 36: 'Nhập làn bên trái' + on, 37: 'Nhập làn bên phải' + on };
-  return T[m.type] || m.instruction || 'Tiếp tục';
-}
-function median(a) { const s = [...a].sort((x, y) => x - y), n = s.length; return n ? (n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2) : 0; }
 /*PURE-END*/
 
 const map = new maplibregl.Map({ container: 'map', style: CONFIG.STYLE_URL, center: CONFIG.CENTER, zoom: CONFIG.ZOOM, minZoom: 3, maxBounds: CONFIG.BOUNDS, pitchWithRotate: false, touchPitch: false });
@@ -269,7 +252,8 @@ const geo = new maplibregl.GeolocateControl({ positionOptions: { enableHighAccur
 map.addControl(geo, 'bottom-right');                                                                                              // nút định vị nhỏ như Google Maps
 map.on('error', e => { const msg = (e && e.error && (e.error.message || e.error.status)) || 'không rõ'; console.error('Lỗi bản đồ:', e); say('Lỗi bản đồ: ' + msg); });
 
-let mode = 'idle', myPos = null, lastWard = '', LPFIRED = 0, HOME = null;
+let wardPop = null;
+let mode = 'idle', myPos = null, lastWard = '', HOME = null;
 geo.on('geolocate', e => {
   myPos = [e.coords.longitude, e.coords.latitude];
   const w = findWard(myPos), n = w ? w._ten + ', ' + w._tinh : '';
@@ -290,10 +274,11 @@ function wardName(p) {
   for (const k in p) if (typeof p[k] === 'string' && p[k] && k[0] !== '_') return p[k];
   return p._file || '(không rõ tên)';
 }
-function findWard(p) {
-  for (const id in wardData) for (const f of wardData[id]) if (inGeom(p, f.geometry)) return f.properties;
+function wardFeat(p) {
+  for (const id in wardData) for (const f of wardData[id]) if (inGeom(p, f.geometry)) return f;
   return null;
 }
+function findWard(p) { const f = wardFeat(p); return f ? f.properties : null; }
 function buildProvinces(results) {
   const failed = [];
   PROV.forEach((pv, i) => {
@@ -305,11 +290,14 @@ function buildProvinces(results) {
     wardData[pv.id] = g.features;
     const bb = bboxOf(coordsOf(g.features)); PBOX.push([bb[0][0], bb[0][1], bb[1][0], bb[1][1]]);
     map.addSource(pv.id, { type: 'geojson', data: g, maxzoom: 12, tolerance: 0.5 });
-    map.addLayer({ id: pv.id + '-fill', type: 'fill', source: pv.id, paint: { 'fill-color': pv.color, 'fill-opacity': ['interpolate', ['linear'], ['zoom'], 10, 0.16, 15, 0.05] } }, 'routes-casing');
-    map.addLayer({ id: pv.id + '-line', type: 'line', source: pv.id, paint: { 'line-color': pv.dark, 'line-width': 0.9, 'line-opacity': 0.7 } }, 'routes-casing');
-    map.addLayer({ id: pv.id + '-label', type: 'symbol', source: pv.id, minzoom: 9, maxzoom: 15.5,
-      layout: { 'text-field': ['get', '_ten'], 'text-font': ['Noto Sans Regular'], 'text-size': 13 },
-      paint: { 'text-color': '#1f2a2e', 'text-halo-color': '#ffffff', 'text-halo-width': 1.5 } });
+    // Tô màu xã/phường nhạt khi nhìn xa, mờ dần khi phóng to để không che tên đường
+    map.addLayer({ id: pv.id + '-fill', type: 'fill', source: pv.id, paint: { 'fill-color': pv.color, 'fill-opacity': ['interpolate', ['linear'], ['zoom'], 7, 0.22, 11, 0.16, 14, 0.08, 16, 0.03] } }, 'routes-casing');
+    // Viền xã/phường: mảnh khi nhìn xa (đỡ rối), dày dần khi phóng to
+    map.addLayer({ id: pv.id + '-line', type: 'line', source: pv.id, layout: { 'line-join': 'round' }, paint: { 'line-color': pv.dark, 'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.3, 10, 0.8, 13, 1.6, 16, 2.4], 'line-opacity': ['interpolate', ['linear'], ['zoom'], 7, 0.4, 11, 0.7, 14, 0.9] } }, 'routes-casing');
+    // Tên xã/phường: chữ lớn dần theo mức phóng, viền trắng dày, xuống dòng khi tên dài
+    map.addLayer({ id: pv.id + '-label', type: 'symbol', source: pv.id, minzoom: 9.5, maxzoom: 15.5,
+      layout: { 'text-field': ['get', '_ten'], 'text-font': ['Noto Sans Bold'], 'text-size': ['interpolate', ['linear'], ['zoom'], 9.5, 10, 12, 12, 14, 15], 'text-max-width': 6, 'text-padding': 4 },
+      paint: { 'text-color': pv.dark, 'text-halo-color': '#ffffff', 'text-halo-width': 2.2, 'text-halo-blur': 0.4 } });
   });
   if (failed.length) say('Chưa tải được: ' + failed.join(', ') + '. Kiểm tra thư mục data/.', 20000);
 }
@@ -331,12 +319,12 @@ function buildTinh(res) {
   map.addSource('tinh-pts', { type: 'geojson', data: { type: 'FeatureCollection', features: pts } });
   const byProv = (a, b, c, d) => ['match', ['get', '_tinh'], 'Lâm Đồng', a, 'Khánh Hòa', b, 'Đắk Lắk', c, d];
   map.addLayer({ id: 'mask-fill', type: 'fill', source: 'mask', paint: { 'fill-color': '#e4eaec', 'fill-opacity': 1 } }, first);
-  map.addLayer({ id: 'tinh-casing', type: 'line', source: 'tinh', layout: { 'line-join': 'round' }, paint: { 'line-color': '#ffffff', 'line-width': 8 } }, 'routes-casing');
-  map.addLayer({ id: 'tinh-line', type: 'line', source: 'tinh', layout: { 'line-join': 'round' }, paint: { 'line-color': byProv('#6a1b9a', '#bf360c', '#1b5e20', '#111111'), 'line-width': 4 } }, 'routes-casing');
+  map.addLayer({ id: 'tinh-casing', type: 'line', source: 'tinh', layout: { 'line-join': 'round' }, paint: { 'line-color': '#ffffff', 'line-opacity': 0.95, 'line-width': ['interpolate', ['linear'], ['zoom'], 5, 5, 9, 8, 13, 11] } }, 'routes-casing');
+  map.addLayer({ id: 'tinh-line', type: 'line', source: 'tinh', layout: { 'line-join': 'round' }, paint: { 'line-color': byProv('#6a1b9a', '#bf360c', '#1b5e20', '#111111'), 'line-width': ['interpolate', ['linear'], ['zoom'], 5, 2.5, 9, 4.5, 13, 6] } }, 'routes-casing');
   map.addLayer({ id: 'tinh-label', type: 'symbol', source: 'tinh-pts', maxzoom: 10.5,
     layout: { 'text-field': ['get', 'name'], 'text-font': ['Noto Sans Bold'], 'text-transform': 'uppercase', 'text-letter-spacing': 0.08,
-      'text-size': ['interpolate', ['linear'], ['zoom'], 5, 14, 7, 20, 10, 26], 'text-allow-overlap': true, 'text-ignore-placement': true },
-    paint: { 'text-color': byProv('#4a148c', '#8c2a00', '#0d3b12', '#111111'), 'text-halo-color': '#ffffff', 'text-halo-width': 2.5 } });
+      'text-size': ['interpolate', ['linear'], ['zoom'], 5, 15, 7, 22, 10, 28], 'text-allow-overlap': true, 'text-ignore-placement': true },
+    paint: { 'text-color': byProv('#4a148c', '#8c2a00', '#0d3b12', '#111111'), 'text-halo-color': '#ffffff', 'text-halo-width': 3 } });
 }
 
 /* ===== Khung nhìn: phóng ra hết cỡ thì phần đất liền 3 tỉnh nằm chính giữa màn hình ===== */
@@ -353,7 +341,6 @@ let loadDone = false;
 function hideLoading() {
   if (loadDone) return; loadDone = true;
   const el = document.getElementById('loading'); if (el) { el.classList.add('off'); setTimeout(() => el.remove(), 450); }
-  say('Mẹo: chạm giữ ' + Math.round(CONFIG.LONGPRESS_MS / 1000) + ' giây vào một điểm để chỉ đường.', 7000);
 }
 setTimeout(hideLoading, 40000);   // phòng khi mạng quá chậm
 
@@ -367,13 +354,19 @@ map.on('load', async () => {
   buildProvinces(res.slice(0, 3));
   buildTinh(res[3]);
   if (PBOX.length) { const b = allBox(); HOME = [[b[0], b[1]], [b[2], b[3]]]; fitHome(); }
-  addHQ();
+  map.addSource('hl', { type: 'geojson', data: EMPTY });   // xã/phường đang được chạm chọn
+  map.addLayer({ id: 'hl-fill', type: 'fill', source: 'hl', paint: { 'fill-color': '#fdd835', 'fill-opacity': 0.28 } }, 'routes-casing');
+  map.addLayer({ id: 'hl-line', type: 'line', source: 'hl', layout: { 'line-join': 'round' }, paint: { 'line-color': '#111111', 'line-width': 3 } }, 'routes-casing');
+  addLayers();   // các lớp ẩn/hiện (UBND...) vẽ bằng lớp của bản đồ, nằm dưới logo trụ sở
+  addHQ();       // logo D1, D2, D3, E07 là phần tử HTML nên luôn nằm trên các lớp
   map.once('idle', hideLoading);
 });
 
 /* ===== Ghim trụ sở K1, K2, K3 có logo viền tròn (sửa vị trí trong tru-so.js) ===== */
 const HQ_COLOR = { 'Lâm Đồng': '#6a1b9a', 'Khánh Hòa': '#bf360c', 'Đắk Lắk': '#1b5e20' };
 function hqElement(h) {
+
+
   const color = h.color || HQ_COLOR[h.tinh] || '#333';
   const el = document.createElement('div'); el.className = 'hqm';
   const ring = document.createElement('div'); ring.className = 'ring'; ring.style.borderColor = color;
@@ -382,19 +375,39 @@ function hqElement(h) {
   el.appendChild(ring); el.appendChild(lb);
   return el;
 }
+function mkCard({ color, kicker, title, sub, chip, logo, line }) {   // thẻ thông tin dùng chung cho trụ sở và UBND/KCN
+  const box = document.createElement('div');
+  const hd = document.createElement('div'); hd.className = 'pc-h'; hd.style.background = color; box.appendChild(hd);
+  if (logo) { const lg = document.createElement('div'); lg.className = 'pc-logo'; const im = document.createElement('img'); im.src = CONFIG.LOGO; im.alt = ''; lg.appendChild(im); hd.appendChild(lg); }
+  const tx = document.createElement('div'); tx.className = 'pc-t'; hd.appendChild(tx);
+  if (kicker) { const k = document.createElement('small'); k.textContent = kicker; tx.appendChild(k); }
+  const t = document.createElement('b'); t.textContent = title; tx.appendChild(t);
+  if (sub) { const u = document.createElement('i'); u.textContent = sub; tx.appendChild(u); }
+  const body = document.createElement('div'); body.className = 'pc-b'; box.appendChild(body);
+  if (chip) { const c = document.createElement('span'); c.className = 'pc-chip'; c.style.background = color; c.textContent = chip; body.appendChild(c); }
+  if (line) { const l = document.createElement('div'); l.className = 'pc-line'; l.textContent = line; body.appendChild(l); }
+  return { box, body };
+}
 function openHQ(h) {
-  const box = document.createElement('div'); box.className = 'pop';
-  const t = document.createElement('b'); t.textContent = h.name + ' – ' + (h.ten || h.tinh); box.appendChild(t);
   const w = findWard([h.lng, h.lat]);
-  const p = document.createElement('div'); p.textContent = w ? 'Vị trí hiện tại thuộc: ' + w._ten + ', ' + w._tinh : 'Vị trí chưa nằm trong xã/phường nào của dữ liệu'; box.appendChild(p);
-  const b = document.createElement('button'); b.textContent = 'Chỉ đường đến đây';
-  b.onclick = () => { pop.remove(); toRoute([h.lng, h.lat], h.name + ' – ' + (h.ten || h.tinh)); };
+  const card = mkCard({ color: h.color || HQ_COLOR[h.tinh] || '#333', logo: true, title: h.name, sub: h.ten || h.tinh, chip: h.tinh,
+    line: w ? 'Thuộc: ' + w._ten + ', ' + w._tinh : 'Vị trí chưa nằm trong xã/phường nào của dữ liệu' });
+  const pop = new maplibregl.Popup({ offset: 30, maxWidth: '300px', className: 'pcard' }).setLngLat([h.lng, h.lat]).setDOMContent(card.box).addTo(map);
+  popButtons(card.body, pop, [h.lng, h.lat], h.name + ' – ' + (h.ten || h.tinh), false);
+}
+function popButtons(box, pop, c, label, withNear) {   // 2 nút dùng chung cho popup trụ sở / UBND
+  const b = document.createElement('button'); b.className = 'pri'; b.textContent = 'Chỉ đường đến đây';
+  b.onclick = () => { pop.remove(); toRoute(c, label); };
   box.appendChild(b);
-  const pop = new maplibregl.Popup({ offset: 30 }).setLngLat([h.lng, h.lat]).setDOMContent(box).addTo(map);
+  if (withNear) {
+    const n = document.createElement('button'); n.textContent = '★ Đơn vị gần nhất đến đây';
+    n.onclick = () => { pop.remove(); toRoute(c, label); nearest(); };
+    box.appendChild(n);
+  }
 }
 let edTA = null;
 const edText = () => '// DANH SÁCH TRỤ SỞ (chép toàn bộ nội dung này vào tệp tru-so.js)\nwindow.HQS = [\n' +
-  HQS.map(h => '  { name: ' + JSON.stringify(h.name) + ', tinh: ' + JSON.stringify(h.tinh) + ', ten: ' + JSON.stringify(h.ten || '') + ', lat: ' + (+h.lat).toFixed(6) + ', lng: ' + (+h.lng).toFixed(6) + ' }').join(',\n') + '\n];\n';
+  HQS.map(h => '  { name: ' + JSON.stringify(h.name) + ', tinh: ' + JSON.stringify(h.tinh) + ', ten: ' + JSON.stringify(h.ten || '') + ', lat: ' + (+h.lat).toFixed(6) + ', lng: ' + (+h.lng).toFixed(6) + (h.kieu ? ', kieu: ' + JSON.stringify(h.kieu) : '') + ' }').join(',\n') + '\n];\n';
 function focusHQ(h) {   // chạm logo: phóng to tới trụ sở (hiện tên đường xung quanh) rồi mở thông tin
   const p = map.project([h.lng, h.lat]), c = map.getContainer();
   if (Math.hypot(p.x - c.clientWidth / 2, p.y - c.clientHeight / 2) < 6 && map.getZoom() >= 16.3) { openHQ(h); return; }
@@ -402,7 +415,7 @@ function focusHQ(h) {   // chạm logo: phóng to tới trụ sở (hiện tên 
   map.once('moveend', () => openHQ(h));
 }
 function addHQ() {
-  HQS.forEach(h => {
+  HQS.filter(h => !h.kieu).forEach(h => {   // chỉ các điểm không có "kieu" (D1, D2, D3, E07) mới là logo; còn lại thuộc các lớp
     const el = hqElement(h);
     const mk = new maplibregl.Marker({ element: el, draggable: EDIT }).setLngLat([h.lng, h.lat]).addTo(map);
     el.addEventListener('click', ev => { ev.stopPropagation(); focusHQ(h); });
@@ -422,25 +435,89 @@ function addHQ() {
   }
 }
 
-/* ===== Chạm giữ để mở chỉ đường: điểm đi để trống, điểm đến là điểm vừa chạm ===== */
-let LP = null;
-function lpCancel() { if (LP) { clearTimeout(LP.t); LP.el.remove(); LP = null; } }
-function lpStart(e) {
-  lpCancel();
-  if (EDIT) return;
-  const oe = e.originalEvent;
-  if (oe && oe.touches && oe.touches.length > 1) return;
-  if (oe && oe.type === 'mousedown' && oe.button !== 0) return;
-  const el = document.createElement('div'); el.className = 'lp';
-  el.style.left = e.point.x + 'px'; el.style.top = e.point.y + 'px'; el.style.animationDuration = CONFIG.LONGPRESS_MS + 'ms';
-  $('map').appendChild(el);
-  const ll = e.lngLat;
-  LP = { x: e.point.x, y: e.point.y, el, t: setTimeout(() => { lpCancel(); lpFire(ll); }, CONFIG.LONGPRESS_MS) };
+/* ===== Lớp ẩn/hiện (UBND...): vẽ bằng lớp bản đồ nên nhẹ, mặc định TẮT; bật trong nút "Lớp" ===== */
+const lyrOn = {};
+const lyrItems = L => HQS.filter(h => h.kieu === L.kieu && (!L.tinh || h.tinh === L.tinh));
+const lyrIds = L => ['lyr-' + L.id + '-dot', 'lyr-' + L.id + '-lb'];
+function addLayers() {
+  CONFIG.LAYERS.forEach(L => {
+    const sid = 'lyr-' + L.id, col = L.color || '#dc2626';
+    map.addSource(sid, { type: 'geojson', data: { type: 'FeatureCollection', features: lyrItems(L).map(h => ({ type: 'Feature',
+      properties: { ten: h.ten || h.name, tinh: h.tinh, col: col, loai: L.name, short: String(h.ten || h.name).replace(/^Ủy Ban Nhân Dân\s*/i, '') },
+      geometry: { type: 'Point', coordinates: [h.lng, h.lat] } })) } });
+    // chấm tròn viền trắng, to dần khi phóng to (dễ chạm bằng ngón tay)
+    map.addLayer({ id: sid + '-dot', type: 'circle', source: sid, layout: { visibility: 'none' },
+      paint: { 'circle-color': col, 'circle-radius': ['interpolate', ['linear'], ['zoom'], 7, 3.5, 11, 5.5, 14, 8, 17, 11], 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 2 } }, 'routes-casing');
+    // tên ngắn gọn (bỏ chữ "Ủy Ban Nhân Dân") chỉ hiện khi phóng đủ gần
+    map.addLayer({ id: sid + '-lb', type: 'symbol', source: sid, minzoom: 12.5, layout: { visibility: 'none', 'text-field': ['get', 'short'], 'text-font': ['Noto Sans Bold'],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 12.5, 11, 16, 14], 'text-anchor': 'top', 'text-offset': [0, 0.9], 'text-max-width': 8 },
+      paint: { 'text-color': L.dark || '#7f1d1d', 'text-halo-color': '#ffffff', 'text-halo-width': 2 } }, 'routes-casing');
+  });
+  buildLayerPanel();
 }
-function lpMove(e) { if (LP && Math.hypot(e.point.x - LP.x, e.point.y - LP.y) > 12) lpCancel(); }
-['touchstart', 'mousedown'].forEach(t => map.on(t, lpStart));
-['touchmove', 'mousemove'].forEach(t => map.on(t, lpMove));
-['touchend', 'touchcancel', 'mouseup', 'dragstart', 'zoomstart', 'rotatestart', 'contextmenu'].forEach(t => map.on(t, lpCancel));
+function setLayer(L, on) { lyrOn[L.id] = on; lyrIds(L).forEach(id => map.getLayer(id) && map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none')); $('lyr-btn').classList.toggle('on', Object.values(lyrOn).some(Boolean)); }
+function buildLayerPanel() {
+  const p = $('lyr'); p.textContent = '';
+  const h = document.createElement('div'); h.className = 'lyr-h'; h.textContent = 'Hiển thị trên bản đồ'; p.appendChild(h);
+  const boxes = [];
+  CONFIG.LAYERS.forEach(L => {
+    const lb = document.createElement('label'); lb.className = 'lyr-it';
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!lyrOn[L.id]; boxes.push([L, cb]);
+    cb.onchange = () => { setLayer(L, cb.checked); if (cb.checked) say(L.name + ': ' + lyrItems(L).length + ' điểm', 2500); };
+    const dt = document.createElement('span'); dt.className = 'dt'; dt.style.background = L.color || '#dc2626';
+    const t = document.createElement('span'); t.textContent = L.name;
+    const n = document.createElement('small'); n.textContent = lyrItems(L).length;
+    [cb, dt, t, n].forEach(x => lb.appendChild(x)); p.appendChild(lb);
+  });
+  const off = document.createElement('button'); off.id = 'lyr-off'; off.textContent = 'Ẩn tất cả';
+  off.onclick = () => boxes.forEach(([L, cb]) => { cb.checked = false; setLayer(L, false); });
+  p.appendChild(off);
+  const h2 = document.createElement('div'); h2.className = 'lyr-h'; h2.textContent = 'Chức năng'; h2.style.marginTop = '8px'; p.appendChild(h2);
+  [['Chỉ đường', 'Chọn điểm đi và điểm đến (chạm bản đồ hoặc gõ tên) rồi bấm OK.', false]].forEach(([ten, mota, near]) => {
+    const b = document.createElement('button'); b.className = 'lyr-fn'; b.textContent = ten;
+    const m = document.createElement('small'); m.textContent = mota; b.appendChild(m);
+    b.onclick = () => startRoute(near);
+    p.appendChild(b);
+  });
+}
+function startRoute(near) {   // mở bảng chỉ đường từ menu
+  $('lyr').hidden = true; $('lyr-btn').setAttribute('aria-expanded', 'false');
+  if (RP.hidden) setHidden(false);
+  if (mode !== 'route') { openRoute(); RP.from = null; place('from'); }
+  RP.active = near ? 'to' : 'from';
+  sugText(near ? 'Chọn điểm đến: chạm bản đồ hoặc gõ tên, rồi bấm “★ Đơn vị gần nhất”.' : 'Chọn điểm đi và điểm đến: chạm bản đồ hoặc gõ tên, rồi bấm OK.');
+}
+$('lyr-btn').onclick = () => { const h = !$('lyr').hidden; $('lyr').hidden = h; $('lyr-btn').setAttribute('aria-expanded', String(!h)); };
+function ubHit(e, r = 12) {   // chạm trúng chấm của lớp đang bật (vùng chạm rộng r px mỗi phía, mặc định 12 cho ngón tay)
+  const layers = []; CONFIG.LAYERS.forEach(L => { if (lyrOn[L.id] && map.getLayer(lyrIds(L)[0])) layers.push(lyrIds(L)[0]); });
+  if (!layers.length) return null;
+  return map.queryRenderedFeatures([[e.point.x - r, e.point.y - r], [e.point.x + r, e.point.y + r]], { layers })[0] || null;
+}
+const tip = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 14, className: 'tip' });
+let tipKey = '';
+if (window.matchMedia && matchMedia('(hover: hover)').matches) {   // chỉ máy có chuột; điện thoại vẫn chạm để xem
+  map.on('mousemove', e => {
+    if (EDIT) return;
+    const f = ubHit(e, 8);
+    map.getCanvas().style.cursor = f ? 'pointer' : '';
+    if (!f) { tip.remove(); tipKey = ''; return; }
+    const c = f.geometry.coordinates.slice(), key = c.join(',');
+    if (key === tipKey) return;   // vẫn đang ở chấm cũ, khỏi dựng lại
+    tipKey = key;
+    const box = document.createElement('div'); box.className = 'tipc'; box.style.borderLeftColor = f.properties.col || '#dc2626';
+    const t = document.createElement('b'); t.textContent = f.properties.ten; box.appendChild(t);
+    box.appendChild(document.createTextNode(f.properties.tinh));
+    tip.setLngLat(c).setDOMContent(box).addTo(map);
+  });
+}
+function openUB(f) {
+  const c = f.geometry.coordinates.slice(), p = f.properties;
+  const card = mkCard({ color: p.col || '#dc2626', kicker: /^Ủy Ban Nhân Dân/i.test(p.ten) ? 'Ủy ban nhân dân' : p.loai, title: p.short, chip: p.tinh });
+  const pop = new maplibregl.Popup({ offset: 14, maxWidth: '300px', className: 'pcard' }).setLngLat(c).setDOMContent(card.box).addTo(map);
+  popButtons(card.body, pop, c, p.ten, true);
+}
+
+/* ===== Mở bảng chỉ đường (từ menu hoặc từ popup) ===== */
 const pointLabel = (p, w) => 'Điểm chọn' + (w ? ' · ' + w._ten + ', ' + w._tinh : ' trên bản đồ');
 function toRoute(c, label) {   // mở bảng chỉ đường với điểm đến = c
   if (RP.hidden) setHidden(false);
@@ -448,17 +525,10 @@ function toRoute(c, label) {   // mở bảng chỉ đường với điểm đ�
   setPoint('to', c, label);
   if (!RP.from) { RP.active = 'from'; sugText('Chọn điểm đi: chạm bản đồ, gõ tên, hoặc bấm “Vị trí tôi”. Sau đó bấm OK.'); }
 }
-function lpFire(ll) {
-  const p = [ll.lng, ll.lat], w = findWard(p);
-  if (!w && Object.keys(wardData).length) { say('Chỉ chọn được điểm trong 3 tỉnh Lâm Đồng, Khánh Hòa, Đắk Lắk.'); return; }
-  LPFIRED = Date.now();
-  if (navigator.vibrate) navigator.vibrate(30);
-  toRoute(p, pointLabel(p, w));
-}
-
 map.on('click', e => {
-  if (Date.now() - LPFIRED < 900) return;   // bỏ qua cú "click" sinh ra khi nhả tay sau khi chạm giữ
+  tip.remove(); tipKey = '';   // chạm/click thì tắt tooltip hover
   const p = [e.lngLat.lng, e.lngLat.lat];
+  if (!$('lyr').hidden) { $('lyr').hidden = true; $('lyr-btn').setAttribute('aria-expanded', 'false'); }   // chạm bản đồ = đóng bảng lớp
   if (mode === 'route') {
     const hit = map.queryRenderedFeatures([[e.point.x - 9, e.point.y - 9], [e.point.x + 9, e.point.y + 9]], { layers: ['routes-line'] })[0];
     if (RP.routes.length) {   // đã có đường: chạm bất kỳ đâu để ẩn menu, chạm đường xanh để hiện lại
@@ -466,18 +536,26 @@ map.on('click', e => {
       if (hit && hit.properties.sel !== 1) { RP.sel = hit.properties.i; showRoutes(false); return; }   // chạm đường xám = chọn tuyến đó
       setHidden(true); return;
     }
+    const ub = ubHit(e);   // chạm đúng chấm UBND = chọn luôn điểm đó
+    if (ub) { setPoint(RP.active, ub.geometry.coordinates.slice(), ub.properties.ten); return; }
     const w = findWard(p);
     if (!w && Object.keys(wardData).length) { sugText('Chỉ chọn được điểm trong 3 tỉnh Lâm Đồng, Khánh Hòa, Đắk Lắk.'); return; }
     setPoint(RP.active, p, pointLabel(p, w));
   } else {
-    const layers = PROV.map(q => q.id + '-fill').filter(l => map.getLayer(l));
-    const f = map.queryRenderedFeatures(e.point, { layers })[0];
-    if (f) new maplibregl.Popup().setLngLat(e.lngLat).setText(f.properties._ten + ' – ' + f.properties._tinh).addTo(map);
+    const ub = ubHit(e);
+    if (ub) { openUB(ub); return; }
+    const wf = wardFeat(p);
+    if (wf) {   // tô sáng xã/phường vừa chạm cho dễ thấy trên điện thoại; tắt khi đóng popup
+      const pop = new maplibregl.Popup().setLngLat(e.lngLat).setText(wf.properties._ten + ' – ' + wf.properties._tinh).addTo(map);
+      wardPop = pop;
+      map.getSource('hl').setData({ type: 'FeatureCollection', features: [wf] });
+      pop.on('close', () => { if (wardPop === pop) map.getSource('hl').setData(EMPTY); });
+    }
   }
 });
 
 /* ===== Chỉ đường kiểu Google Maps: bấm OK mới tìm, nhiều lựa chọn, km và thời gian, hướng dẫn từng bước ===== */
-const RP = { from: null, to: null, active: 'from', mk: {}, timer: null, routes: [], sel: 0, steps: false, hidden: false, seq: 0, rseq: 0, expanded: false, cal: null };
+const RP = { from: null, to: null, active: 'from', mk: {}, timer: null, routes: [], sel: 0, steps: false, hidden: false, seq: 0, rseq: 0, sess: null, near: null };
 const sugClear = () => { $('rp-sug').textContent = ''; };
 function sugText(t) { sugClear(); const d = document.createElement('div'); d.className = 'msg'; d.textContent = t; $('rp-sug').appendChild(d); }
 function sheetShow(on) { $('sheet').hidden = !on; document.documentElement.style.setProperty('--sh', on ? $('sheet').offsetHeight + 'px' : '0px'); }
@@ -496,7 +574,7 @@ function place(k) {
   if (!RP.mk[k]) RP.mk[k] = new maplibregl.Marker({ color: k === 'from' ? '#188038' : '#d93025' });
   RP.mk[k].setLngLat(v.c).addTo(map);
 }
-function clearResults() { RP.routes = []; map.getSource('routes') && map.getSource('routes').setData(EMPTY); sheetShow(false); }
+function clearResults() { RP.routes = []; RP.near = null; map.getSource('routes') && map.getSource('routes').setData(EMPTY); sheetShow(false); }
 function hint() { sugText(RP.from && RP.to ? 'Bấm OK để tìm đường.' : 'Chọn tiếp điểm ' + (RP.from ? 'đến' : 'đi') + ' (chạm bản đồ hoặc gõ tên).'); }
 function setPoint(k, c, label) {
   RP[k] = { c, label }; place(k); clearResults();
@@ -511,7 +589,8 @@ function closeRoute() {
 $('rp-close').onclick = closeRoute;
 $('rp-ok').onclick = () => { if (!RP.from || !RP.to) { hint(); return; } getRoute(); };
 $('rp-swap').onclick = () => { const a = RP.from; RP.from = RP.to; RP.to = a; place('from'); place('to'); clearResults(); hint(); };
-$('rp-prof').onchange = () => { if (RP.routes.length) getRoute(); };
+$('rp-prof').onchange = () => { if (RP.routes.length) { if (RP.near) nearest(); else getRoute(); } };
+$('rp-near').onclick = () => nearest();
 $('rp-me').onclick = () => {
   const use = c => setPoint('from', c, 'Vị trí của tôi');
   if (myPos) { use(myPos); return; }
@@ -536,37 +615,60 @@ function localHits(q) {   // trụ sở và xã/phường: tìm ngay trên máy,
   }
   return out;
 }
+// Nominatim (OpenStreetMap): chỉ còn là DỰ PHÒNG khi Goong lỗi hoặc chưa có key
 async function nomi(q, box) {
   const [w, s, e, n] = box;
   const r = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=40&accept-language=vi&countrycodes=vn&bounded=1&viewbox=' + [w, n, e, s].join(',') + '&q=' + encodeURIComponent(q));
   if (!r.ok) throw new Error('nominatim ' + r.status);
   return (await r.json()).map(x => ({ title: String(x.display_name).split(', ')[0], c: [+x.lon, +x.lat] }));
 }
-async function photon(q, box) {
-  const r = await fetch('https://photon.komoot.io/api/?limit=20&bbox=' + box.join(',') + '&q=' + encodeURIComponent(q));
-  if (!r.ok) throw new Error('photon ' + r.status);
-  return (await r.json()).features.map(f => { const p = f.properties || {}; return { title: p.name || p.street || '', c: f.geometry.coordinates }; }).filter(x => x.title);
+// ---- Goong ----
+// Ưu tiên GOONG_API_KEY; nếu chưa có thì dùng giá trị ORS_API_KEY cũ trong config.js (phòng khi bạn dán key Goong vào ô cũ)
+function goongKey() { return CONFIG.GOONG_API_KEY || (window.USER_CONFIG || {}).ORS_API_KEY || ''; }
+async function goongGet(path, params) {   // gọi REST API của Goong (GET), trả JSON
+  const key = goongKey();
+  if (!key) throw new Error('Chưa có key Goong. Mở config.js và đặt GOONG_API_KEY.');
+  const u = new URL(CONFIG.GOONG_BASE + path);
+  Object.keys(params || {}).forEach(k => { if (params[k] != null) u.searchParams.set(k, params[k]); });
+  u.searchParams.set('api_key', key);
+  const r = await fetch(u);
+  const d = await r.json().catch(() => null);
+  if (!r.ok) {
+    const m = d && (d.error || d.message || d.error_message);
+    throw new Error((m ? String(m.message || m) : 'Goong mã lỗi ' + r.status) + (r.status === 401 || r.status === 403 ? ' (kiểm tra key)' : ''));
+  }
+  return d || {};
+}
+const newSession = () => (window.crypto && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
+async function goongSuggest(q) {   // gợi ý địa điểm; KHÔNG có toạ độ, toạ độ lấy sau bằng placeDetail khi người dùng chọn
+  const b = allBox();
+  if (!RP.sess) RP.sess = newSession();   // cùng một phiên gõ → Goong tính tiền gộp
+  const d = await goongGet('/Place/AutoComplete', { input: q, location: ((b[1] + b[3]) / 2).toFixed(5) + ',' + ((b[0] + b[2]) / 2).toFixed(5), radius: 300, limit: 10, more_compound: 'true', sessiontoken: RP.sess });
+  return (d.predictions || []).map(p => { const sf = p.structured_formatting || {}; return { title: sf.main_text || String(p.description || '').split(',')[0], sub: sf.secondary_text || p.description || '', pid: p.place_id }; });
+}
+async function placeDetail(pid) {   // lấy toạ độ [lng, lat] của một gợi ý
+  const d = await goongGet('/Place/Detail', { place_id: pid, sessiontoken: RP.sess });
+  const l = d.result && d.result.geometry && d.result.geometry.location;
+  if (!l) throw new Error('Goong không trả toạ độ');
+  RP.sess = null;   // chọn xong = kết thúc phiên
+  return [+l.lng, +l.lat];
 }
 async function geocode(q) {
-  const seen = new Set(), out = []; let raw = 0;
-  const add = list => {
-    raw += list.length;
+  if (goongKey()) {
+    try { const list = await goongSuggest(q); return { list, raw: list.length }; }
+    catch (e) { console.warn('Goong lỗi:', e); say('Goong lỗi: ' + e.message + ' (dùng Nominatim dự phòng)', 5000); }
+  }
+  const seen = new Set(), out = []; let raw = 0;   // dự phòng: Nominatim, chỉ giữ điểm nằm trong 3 tỉnh
+  try {
+    const list = await nomi(q, allBox()); raw = list.length;
     list.forEach(x => {
       const w = findWard(x.c);
-      if (!w && Object.keys(wardData).length) return;   // chỉ giữ kết quả nằm trong 3 tỉnh
+      if (!w && Object.keys(wardData).length) return;
       const k = x.c[0].toFixed(4) + ',' + x.c[1].toFixed(4);
       if (seen.has(k)) return; seen.add(k);
       x.sub = w ? w._ten + ', ' + w._tinh : ''; out.push(x);
     });
-  };
-  const variants = [q];
-  if (!/^(duong|pho|quoc lo|ql|tinh lo|tl|hem|ngo|dai lo)\b/.test(norm(q))) variants.push('Đường ' + q);
-  for (const v of variants) {
-    try { add(await nomi(v, allBox())); } catch (e) { /* thử tiếp */ }
-    for (const box of PBOX) { if (out.length >= 3) break; await sleep(1100); try { add(await nomi(v, box)); } catch (e) { /* thử tiếp */ } }   // từng tỉnh một, cách nhau hơn 1 giây theo quy định của Nominatim
-    if (out.length < 3) (await Promise.allSettled(PBOX.map(b => photon(v, b)))).forEach(r => { if (r.status === 'fulfilled') add(r.value); });
-    if (out.length) break;
-  }
+  } catch (e) { /* không có nguồn nào trả lời */ }
   const c = map.getCenter(), d2 = x => (x.c[0] - c.lng) ** 2 + (x.c[1] - c.lat) ** 2;
   out.sort((a, b) => d2(a) - d2(b));   // ưu tiên kết quả gần khu vực đang xem
   return { list: out.slice(0, 10), raw };
@@ -583,7 +685,17 @@ function showList(k, list, withSearch) {
     const d = document.createElement('div'); d.className = 'it';
     const t = document.createElement('div'); t.textContent = x.title; d.appendChild(t);
     if (x.sub) { const m = document.createElement('small'); m.textContent = x.sub; d.appendChild(m); }
-    d.onclick = () => { setPoint(k, x.c, x.title + (x.sub ? ' · ' + x.sub : '')); map.easeTo({ center: x.c, zoom: Math.max(map.getZoom(), 13) }); };
+    d.onclick = async () => {
+      RP.seq++; ['from', 'to'].forEach(n => clearTimeout($('rp-' + n)._t));   // bỏ các lần tìm đang chờ
+      let c = x.c;
+      if (!c && x.pid) {   // gợi ý của Goong chưa có toạ độ → hỏi Place Detail
+        say('Đang lấy vị trí…', 2500);
+        try { c = await placeDetail(x.pid); } catch (e) { say('Không lấy được vị trí: ' + e.message); return; }
+      }
+      if (!findWard(c) && Object.keys(wardData).length) { say('Địa điểm này nằm ngoài 3 tỉnh Lâm Đồng, Khánh Hòa, Đắk Lắk.'); return; }
+      setPoint(k, c, x.title + (x.sub ? ' · ' + x.sub : ''));
+      map.easeTo({ center: c, zoom: Math.max(map.getZoom(), 13) });
+    };
     $('rp-sug').appendChild(d);
   });
 }
@@ -594,7 +706,7 @@ async function suggest(k, q) {
   const loc = localHits(q), { list, raw } = await geocode(q);
   if (my !== RP.seq) return;   // đã có lần tìm mới hơn
   const all = loc.concat(list);
-  if (!all.length) { sugText(raw ? 'Có ' + raw + ' kết quả trên OpenStreetMap nhưng đều nằm ngoài 3 tỉnh.' : 'OpenStreetMap chưa có “' + q + '” trong khu vực. Thử viết khác (thêm “Đường”, bỏ dấu…) hoặc chạm lên bản đồ.'); return; }
+  if (!all.length) { sugText(raw ? 'Có ' + raw + ' kết quả nhưng đều nằm ngoài 3 tỉnh.' : 'Không tìm thấy “' + q + '” trong khu vực. Thử viết khác (thêm “Đường”, bỏ dấu…) hoặc chạm lên bản đồ.'); return; }
   showList(k, all, false);
 }
 ['from', 'to'].forEach(k => {
@@ -603,180 +715,102 @@ async function suggest(k, q) {
   el.oninput = () => {
     const q = el.value.trim();
     if (!q) { RP[k] = null; if (RP.mk[k]) { RP.mk[k].remove(); delete RP.mk[k]; } clearResults(); hint(); return; }
-    showList(k, localHits(q), true);   // khi gõ chỉ gợi ý trụ sở và xã/phường; tìm đường phố thì bấm Enter hoặc dòng “Tìm trên bản đồ”
+    showList(k, localHits(q), true);   // gợi ý ngay trụ sở và xã/phường (không tốn lượt gọi)
+    clearTimeout(el._t);               // debounce: chờ người dùng ngừng gõ 0,7 giây mới gọi Goong
+    if (CONFIG.AUTOCOMPLETE_ON_TYPE && goongKey() && q.length >= 3) el._t = setTimeout(() => suggest(k, el.value.trim()), 700);
   };
   el.onkeydown = ev => { if (ev.key === 'Enter') { ev.preventDefault(); suggest(k, el.value.trim()); } };
 });
 
-/* --- lấy tuyến: trước hết chỉ lấy tuyến NHANH NHẤT; các tuyến khác lấy khi người dùng bấm "Chọn tuyến khác" --- */
+/* --- Tìm đường: TOÀN BỘ do Goong tính (thời gian, quãng đường, hình dạng, hướng dẫn). Không còn thuật toán tự viết --- */
 const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('quá thời gian chờ')), ms))]);
-const hasKey = () => CONFIG.ORS_API_KEY && !CONFIG.ORS_API_KEY.startsWith('DÁN');
-const modeKey = () => ({ 'driving-car': 'car', 'moto': 'moto', 'cycling-regular': 'bike', 'foot-walking': 'foot' }[$('rp-prof').value] || 'car');
-const F = () => CONFIG.ETA_FACTOR[modeKey()] || 1;
-const mkRoute = (coords, dist, raw, steps) => ({ coords, dist, raw, dur: raw * F(), steps, via: viaOf(steps) });   // raw = thời gian gốc của nguồn tính; dur = sau khi nhân hệ số hiệu chuẩn
-async function orsRoutes(prof, extra) {
-  if (!hasKey()) throw new Error('Chưa có API key. Mở tệp config.js và dán key HeiGIT vào.');
-  const body = Object.assign({ coordinates: [RP.from.c, RP.to.c], radiuses: [-1, -1], instructions: true, language: 'en' }, extra || {});
-  const r = await fetch(CONFIG.ORS_BASE + '/v2/directions/' + prof + '/geojson', { method: 'POST', headers: { 'Authorization': CONFIG.ORS_API_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-  const d = await r.json().catch(() => null);
-  if (!r.ok) {
-    const m = d && d.error ? String(d.error.message || d.error) : '';
-    throw new Error((m || 'mã lỗi ' + r.status) + (r.status === 401 || r.status === 403 ? ' (kiểm tra key)' : ''));
-  }
-  return d.features.map(f => {
-    const coords = f.geometry.coordinates, sm = f.properties.summary;
-    const steps = ((f.properties.segments || [])[0] || { steps: [] }).steps.map(s => ({ t: viStep(s), d: s.distance, n: s.name, c: coords[s.way_points[0]], end: s.type === 10 }));
-    return mkRoute(coords, sm.distance, sm.duration, steps);
+const hasKey = () => !!goongKey() && !goongKey().startsWith('DÁN');   // đã có key Goong thật chưa
+const goongVeh = () => $('rp-prof').value === 'moto' ? (CONFIG.GOONG_MOTO_VEHICLE || 'bike') : 'car';   // loại xe gửi cho Goong
+// Chuẩn hoá một tuyến: dist = mét, dur = giây (đúng số Goong trả về, không nhân hệ số nào)
+const mkRoute = (coords, dist, dur, steps) => ({ coords, dist, dur, steps, via: viaOf(steps) });
+async function goongRoutes(veh, o, d) {   // Goong Directions: routes[].legs[].steps, overview_polyline mã hoá 5 chữ số; alternatives=true → nhiều tuyến
+  // o, d là [lng, lat]; Goong cần "lat,lng"
+  const j = await goongGet('/Direction', { origin: o[1] + ',' + o[0], destination: d[1] + ',' + d[0], vehicle: veh, alternatives: 'true' });
+  if (!j.routes || !j.routes.length) throw new Error('không có tuyến' + (j.status ? ' (' + j.status + ')' : ''));
+  return j.routes.map(rt => {
+    if (!rt.overview_polyline || !rt.overview_polyline.points) throw new Error('Goong không trả hình dạng tuyến');
+    const legs = rt.legs || [];
+    const dist = legs.reduce((sum, l) => sum + ((l.distance && l.distance.value) || 0), 0);
+    const dur = legs.reduce((sum, l) => sum + ((l.duration && l.duration.value) || 0), 0);
+    const coords = decodePoly(rt.overview_polyline.points, 5);
+    const all = legs.flatMap(l => l.steps || []);
+    const steps = all.map((st, i) => ({ t: viGoong(st), d: (st.distance && st.distance.value) || 0, n: st.name || '', c: st.start_location ? [st.start_location.lng, st.start_location.lat] : coords[0], end: i === all.length - 1 }));
+    const r = mkRoute(coords, dist, dur, steps);
+    if (!r.via && rt.summary) r.via = 'Qua ' + rt.summary;
+    return r;
   });
 }
-async function osrmRoutes(alt) {
-  const a = RP.from.c.join(','), b = RP.to.c.join(',');
-  const r = await fetch('https://router.project-osrm.org/route/v1/driving/' + a + ';' + b + '?alternatives=' + (alt ? 3 : 'false') + '&overview=full&geometries=geojson&steps=true');
-  const d = await r.json();
-  if (d.code !== 'Ok') throw new Error(d.message || d.code);
-  return d.routes.map(x => {
-    const steps = x.legs.flatMap(l => l.steps).map(s => ({ t: viOsrm(s), d: s.distance, n: s.name || s.ref || '', c: s.maneuver.location, end: s.maneuver.type === 'arrive' }));
-    return mkRoute(x.geometry.coordinates, x.distance, x.duration, steps);
-  });
-}
-async function valRoutes(costing, alt) {   // Valhalla (máy chủ demo FOSSGIS): có chế độ xe máy; chỉ dùng để thử nghiệm
-  const o = RP.from.c, d = RP.to.c;
-  const body = { locations: [{ lat: o[1], lon: o[0] }, { lat: d[1], lon: d[0] }], costing, directions_options: { units: 'kilometers', language: 'en-US' } };
-  if (costing === 'motorcycle') body.costing_options = { motorcycle: { use_highways: 0, top_speed: CONFIG.MOTO_TOP_SPEED } };   // xe máy không được đi cao tốc
-  if (alt) body.alternates = 3;
-  const r = await fetch('https://valhalla1.openstreetmap.de/route', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-  const j = await r.json().catch(() => null);
-  if (!r.ok || !j || !j.trip) throw new Error((j && (j.error || j.error_code)) || 'Valhalla mã lỗi ' + r.status);
-  return [j.trip].concat((j.alternates || []).map(x => x.trip)).map(t => {
-    const leg = t.legs[0], coords = decodePoly(leg.shape);
-    const steps = leg.maneuvers.map(m => ({ t: viVal(m), d: m.length * 1000, n: (m.street_names || [])[0] || '', c: coords[Math.min(m.begin_shape_index, coords.length - 1)], end: [4, 5, 6].includes(m.type) }));
-    return mkRoute(coords, t.summary.length * 1000, t.summary.time, steps);
-  });
-}
-async function fastestRoute() {
-  const prof = $('rp-prof').value;
-  if (prof === 'moto') return (await withTimeout(valRoutes('motorcycle', false), 12000))[0];
-  let err = null;
-  if (hasKey()) {
-    try { return (await withTimeout(orsRoutes(prof, prof === 'driving-car' ? { preference: 'fastest' } : {}), 9000))[0]; } catch (e) { err = e; }   // preference "fastest": mặc định của ORS là "recommended" nên có thể không phải tuyến nhanh nhất
-  } else err = new Error('Chưa có API key. Mở tệp config.js và dán key HeiGIT vào.');
-  if (prof !== 'driving-car') throw err;
-  try { return (await withTimeout(osrmRoutes(false), 9000))[0]; } catch (e) { throw err; }   // ô tô: dự phòng bằng OSRM
-}
+// Bấm OK: một lần gọi Goong lấy tất cả tuyến, xếp theo thời gian Goong trả về (tuyến đầu = nhanh nhất)
 async function getRoute() {
-  sugText('Đang tìm đường nhanh nhất…');
-  RP.expanded = false; RP.cal = null; const my = ++RP.rseq;
-  let base;
-  try { base = await fastestRoute(); } catch (e) { if (my === RP.rseq) sugText('Không tìm được đường: ' + e.message); return; }
-  if (my !== RP.rseq) return;
-  RP.routes = [base]; RP.sel = 0; RP.steps = false;
+  if (!hasKey()) { sugText('Chưa có key Goong. Mở config.js và đặt GOONG_API_KEY.'); return; }
+  sugText('Đang tìm đường…');
+  const my = ++RP.rseq;   // token chống kết quả cũ
+  let list;
+  try { list = await withTimeout(goongRoutes(goongVeh(), RP.from.c, RP.to.c), 15000); } catch (e) { if (my === RP.rseq) sugText('Không tìm được đường: ' + e.message); return; }
+  if (my !== RP.rseq) return;   // trong lúc chờ người dùng đã đổi hành trình
+  RP.near = null; RP.routes = list.sort((a, b) => a.dur - b.dur); RP.sel = 0; RP.steps = false;
   sugClear(); showRoutes(true);
 }
-async function moreRoutes() {   // lấy thêm nhiều tuyến khác, xếp từ nhanh đến chậm
-  const base = RP.routes[0], prof = $('rp-prof').value, car = prof === 'driving-car', fast = car ? { preference: 'fastest' } : {};
-  const btn = document.querySelector('#sheet .more'); if (btn) { btn.textContent = 'Đang tìm thêm tuyến…'; btn.disabled = true; }
-  const jobs = [];
-  if (prof === 'moto') jobs.push(valRoutes('motorcycle', true));
-  else {
-    if (hasKey()) {
-      jobs.push(orsRoutes(prof, Object.assign({ alternative_routes: { target_count: 3, share_factor: 0.6, weight_factor: 1.6 } }, fast)));   // ORS chỉ cho tuyến thay thế dưới ~100 km
-      jobs.push(orsRoutes(prof, { preference: 'shortest' }));
-      if (car) { jobs.push(orsRoutes(prof, { preference: 'fastest', options: { avoid_features: ['highways'] } })); jobs.push(orsRoutes(prof, { preference: 'fastest', options: { avoid_features: ['tollways'] } })); }
-    }
-    if (car) jobs.push(osrmRoutes(true).then(l => { const o = l.find(r => sameRoute(base, r)); const ref = o ? base.dur / o.raw : F(); l.forEach(r => { r.dur = r.raw * ref; }); return l; }));   // quy đổi thời gian OSRM về cùng thang với tuyến gốc
-  }
-  const rid = RP.rseq;
-  const res = await Promise.allSettled(jobs.map(j => withTimeout(j, 14000)));
-  if (rid !== RP.rseq || !RP.routes.includes(base)) return;   // người dùng đã đổi hành trình
-  RP.routes = mergeRoutes(base, res.filter(r => r.status === 'fulfilled').map(r => r.value));
-  RP.sel = RP.routes.indexOf(base); RP.expanded = true; showRoutes(true);
+// Đơn vị gần nhất: hỏi Goong đường nhanh nhất từ từng đơn vị (D1, D2, D3) đến điểm đến, rồi xếp hạng theo thời gian
+async function nearest() {
+  if (!hasKey()) { sugText('Chưa có key Goong. Mở config.js và đặt GOONG_API_KEY.'); return; }
+  if (!RP.to) { sugText('Chọn điểm đến trước (chạm bản đồ hoặc gõ tên), rồi bấm lại nút này.'); return; }
+  const units = HQS.filter(h => CONFIG.NEAREST_UNITS.includes(h.name));
+  if (!units.length) { sugText('Chưa cấu hình đơn vị nào để so sánh (NEAREST_UNITS).'); return; }
+  sugText('Đang so sánh ' + units.map(u => u.name).join(', ') + '…');
+  const my = ++RP.rseq, to = RP.to.c, veh = goongVeh();
+  const res = await Promise.allSettled(units.map(u => withTimeout(goongRoutes(veh, [u.lng, u.lat], to), 15000)));
+  if (my !== RP.rseq) return;   // người dùng đã đổi hành trình trong lúc chờ
+  const near = [], bad = [];
+  res.forEach((r, i) => { if (r.status === 'fulfilled' && r.value.length) near.push({ h: units[i], r: r.value.slice().sort((a, b) => a.dur - b.dur)[0] }); else bad.push(units[i].name); });
+  if (!near.length) { sugText('Không tính được đường từ các đơn vị: ' + (res[0].reason ? res[0].reason.message : 'không có tuyến')); return; }
+  near.sort((a, b) => a.r.dur - b.r.dur);   // gần nhất = thời gian di chuyển ngắn nhất
+  RP.near = near; RP.routes = near.map(n => n.r); RP.sel = 0; RP.steps = false;
+  sugClear(); showRoutes(true);
+  if (bad.length) say('Không tính được: ' + bad.join(', '), 6000);
 }
 
-/* --- Hiệu chuẩn thời gian bằng cách so với Google Maps (mở trang với ?cal=1) --- */
-const calLoad = () => { try { return JSON.parse(localStorage.getItem('cal') || '[]'); } catch (e) { return []; } };
-async function calCompare() {
-  const moto = $('rp-prof').value === 'moto', res = {};
-  const jobs = moto ? [['Valhalla xe máy', () => valRoutes('motorcycle', false)]]
-    : [['ORS ô tô', () => orsRoutes('driving-car', { preference: 'fastest' })], ['OSRM ô tô', () => osrmRoutes(false)], ['Valhalla ô tô', () => valRoutes('auto', false)]];
-  for (const [name, fn] of jobs) {
-    try { const r = (await withTimeout(fn(), 12000))[0]; res[name] = { min: r.raw / 60, km: r.dist / 1000 }; } catch (e) { res[name] = { err: e.message }; }
-    if (name.startsWith('Valhalla')) await sleep(1100);
-  }
-  return res;
-}
-function calSummary() {
-  const S = calLoad(), L = [S.length + ' mẫu đã lưu'];
-  ['car', 'moto'].forEach(m => {
-    const sm = S.filter(x => x.mode === m); if (!sm.length) return;
-    const names = new Set(); sm.forEach(x => Object.keys(x.eng).forEach(n => names.add(n)));
-    names.forEach(n => { const r = sm.filter(x => x.eng[n]).map(x => x.g / x.eng[n]); L.push((m === 'car' ? 'Ô tô' : 'Xe máy') + ' · ' + n + ': Google ÷ nguồn ≈ ' + median(r).toFixed(2) + ' (' + r.length + ' mẫu)'); });
-  });
-  return L.join('\n');
-}
-function calPanel() {
-  const box = document.createElement('div'); box.className = 'cal';
-  const add = (tag, txt, cls) => { const e = document.createElement(tag); if (txt) e.textContent = txt; if (cls) e.className = cls; box.appendChild(e); return e; };
-  add('b', 'Hiệu chuẩn thời gian (chế độ ?cal=1)');
-  const lines = () => RP.cal ? Object.entries(RP.cal).map(([n, v]) => n + ': ' + (v.err ? 'lỗi ' + v.err : Math.round(v.min) + ' phút · ' + v.km.toFixed(1) + ' km')).join('\n') : 'Bấm “So sánh các nguồn”, rồi mở Google Maps cùng hành trình để nhập số của Google.';
-  const out = add('div', lines(), 'out');
-  const b1 = add('button', 'So sánh các nguồn');
-  b1.onclick = async () => { b1.disabled = true; out.textContent = 'Đang hỏi các nguồn (khoảng 5 giây)…'; RP.cal = await calCompare(); out.textContent = lines(); b1.disabled = false; };
-  const row = add('div'); row.append('Google: ');
-  const gm = document.createElement('input'); gm.type = 'number'; gm.placeholder = 'phút'; gm.inputMode = 'numeric';
-  const gk = document.createElement('input'); gk.type = 'number'; gk.placeholder = 'km'; gk.step = '0.1'; gk.inputMode = 'decimal';
-  row.append(gm, ' ', gk, ' ');
-  const sv = document.createElement('button'); sv.textContent = 'Lưu mẫu'; row.appendChild(sv);
-  const sum = add('div', calSummary(), 'out');
-  sv.onclick = () => {
-    if (!RP.cal || !(+gm.value > 0)) { sum.textContent = 'Hãy bấm “So sánh các nguồn” và nhập số phút của Google trước.'; return; }
-    const eng = {}, km = {}; Object.entries(RP.cal).forEach(([n, v]) => { if (!v.err) { eng[n] = v.min; km[n] = v.km; } });
-    const S = calLoad(); S.push({ mode: modeKey(), g: +gm.value, gkm: +gk.value || null, eng, km, from: RP.from.c, to: RP.to.c }); localStorage.setItem('cal', JSON.stringify(S));
-    sum.textContent = calSummary(); gm.value = gk.value = '';
-  };
-  const cp = add('button', 'Chép kết quả');
-  cp.onclick = () => { const txt = calSummary() + '\n' + localStorage.getItem('cal'); navigator.clipboard ? navigator.clipboard.writeText(txt).then(() => say('Đã chép kết quả hiệu chuẩn.'), () => say('Không chép được.')) : say('Trình duyệt không cho chép.'); };
-  const cl = add('button', 'Xóa mẫu'); cl.onclick = () => { localStorage.removeItem('cal'); sum.textContent = calSummary(); };
-  return box;
-}
 function gmapsUrl() {
   const m = { 'driving-car': 'driving', 'moto': 'two-wheeler', 'cycling-regular': 'bicycling', 'foot-walking': 'walking' }[$('rp-prof').value] || 'driving';
   const p = c => c[1].toFixed(6) + ',' + c[0].toFixed(6);
-  return 'https://www.google.com/maps/dir/?api=1&origin=' + p(RP.from.c) + '&destination=' + p(RP.to.c) + '&travelmode=' + m;
+  return 'https://www.google.com/maps/dir/?api=1&origin=' + p(RP.near ? [RP.near[RP.sel].h.lng, RP.near[RP.sel].h.lat] : RP.from.c) + '&destination=' + p(RP.to.c) + '&travelmode=' + m;
 }
 function showRoutes(fit) {
   const R = RP.routes, sh = $('sheet');
   map.getSource('routes').setData({ type: 'FeatureCollection', features: R.map((r, i) => ({ type: 'Feature', properties: { i, sel: i === RP.sel ? 1 : 0 }, geometry: { type: 'LineString', coordinates: r.coords } })) });
   sh.textContent = '';
+  if (RP.near) { const hd = document.createElement('div'); hd.className = 'msg'; hd.style.fontWeight = '700'; hd.textContent = 'Xếp hạng theo thời gian di chuyển đến điểm đã chọn'; sh.appendChild(hd); }
   const shortest = R.reduce((m, r, i) => r.dist < R[m].dist ? i : m, 0);
   R.forEach((r, i) => {
     const c = document.createElement('div'); c.className = 'alt' + (i === RP.sel ? ' sel' : '');
     const l = document.createElement('div'), b = document.createElement('b'), sm = document.createElement('small');
-    b.textContent = '~' + fmtT(r.dur);
-    if (i === 0) { const t = document.createElement('span'); t.className = 'tag'; t.textContent = 'Nhanh nhất'; b.appendChild(t); }
-    else if (i === shortest) { const t = document.createElement('span'); t.className = 'tag'; t.style.background = '#1a73e8'; t.textContent = 'Ngắn nhất'; b.appendChild(t); }
     const diff = i > 0 ? Math.round((r.dur - R[0].dur) / 60) : 0;
-    sm.textContent = (r.via || 'Tuyến ' + (i + 1)) + (diff > 0 ? ' · chậm hơn ' + diff + ' phút' : '');
+    if (RP.near) {   // chế độ xếp hạng đơn vị: #1 là đơn vị đến nhanh nhất
+      const rk = document.createElement('span'); rk.className = 'rk'; rk.textContent = i + 1; b.appendChild(rk);
+      b.appendChild(document.createTextNode(RP.near[i].h.name + ' · ~' + fmtT(r.dur)));
+      if (i === 0) { const t = document.createElement('span'); t.className = 'tag'; t.textContent = 'Gần nhất'; b.appendChild(t); }
+      sm.textContent = (RP.near[i].h.ten || RP.near[i].h.tinh) + (diff > 0 ? ' · chậm hơn ' + diff + ' phút' : '');
+    } else {
+      b.textContent = '~' + fmtT(r.dur);
+      if (i === 0) { const t = document.createElement('span'); t.className = 'tag'; t.textContent = 'Nhanh nhất'; b.appendChild(t); }
+      else if (i === shortest) { const t = document.createElement('span'); t.className = 'tag'; t.style.background = '#1a73e8'; t.textContent = 'Ngắn nhất'; b.appendChild(t); }
+      sm.textContent = (r.via || 'Tuyến ' + (i + 1)) + (diff > 0 ? ' · chậm hơn ' + diff + ' phút' : '');
+    }
     l.appendChild(b); l.appendChild(sm);
     const d = document.createElement('div'); d.className = 'd'; d.textContent = fmtD(r.dist);
     c.appendChild(l); c.appendChild(d);
     c.onclick = () => { RP.sel = i; showRoutes(false); };
     sh.appendChild(c);
   });
-  if (!RP.expanded) {
-    const mb = document.createElement('button'); mb.className = 'lnk more'; mb.textContent = 'Chọn tuyến khác'; mb.onclick = moreRoutes; sh.appendChild(mb);
-  } else if (R.length === 1) { const m = document.createElement('div'); m.className = 'msg'; m.textContent = 'Không tìm thấy tuyến nào khác cho hành trình này.'; sh.appendChild(m); }
+  if (R.length === 1 && !RP.near) { const m = document.createElement('div'); m.className = 'msg'; m.textContent = 'Goong chỉ trả về một tuyến cho hành trình này.'; sh.appendChild(m); }
   const gb = document.createElement('button'); gb.className = 'lnk'; gb.textContent = 'Mở trong Google Maps (giờ có tính kẹt xe, dẫn đường bằng giọng nói)';
   gb.onclick = () => window.open(gmapsUrl(), '_blank', 'noopener'); sh.appendChild(gb);
-  const tg = document.createElement('button'); tg.className = 'lnk'; tg.textContent = RP.steps ? 'Ẩn hướng dẫn từng bước' : 'Xem hướng dẫn từng bước';
-  tg.onclick = () => { RP.steps = !RP.steps; showRoutes(false); };
-  sh.appendChild(tg);
-  if (RP.steps) R[RP.sel].steps.forEach(s => {
-    const d = document.createElement('div'); d.className = 'it'; d.textContent = s.t + (s.end ? '' : ' · ' + fmtD(s.d));
-    d.onclick = () => map.easeTo({ center: s.c, zoom: 16 });
-    sh.appendChild(d);
-  });
-  const note = document.createElement('div'); note.className = 'msg'; note.style.fontSize = '12px'; note.textContent = 'Thời gian là ước tính theo tốc độ trung bình của từng loại đường, chưa tính kẹt xe và đèn giao thông.'; sh.appendChild(note);
-  if (CAL) sh.appendChild(calPanel());
+  const note = document.createElement('div'); note.className = 'msg'; note.style.fontSize = '12px'; note.textContent = 'Thời gian và quãng đường do Goong tính. Muốn đối chiếu thực tế, bấm “Mở trong Google Maps”.'; sh.appendChild(note);
   sheetShow(!RP.hidden);
   if (fit) map.fitBounds(bboxOf(R.flatMap(r => r.coords)), { padding: { top: 220, bottom: Math.round(sh.offsetHeight + 30), left: 40, right: 70 }, maxZoom: 16 });
 }
