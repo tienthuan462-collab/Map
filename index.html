@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://rsapi.goong.io">
 <link rel="preconnect" href="https://router.project-osrm.org">
 <link rel="preconnect" href="https://tiles.openfreemap.org">
+<link rel="preconnect" href="https://tiles.goong.io">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <style>
 html,body{height:100%;margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1f2a2e;overflow:hidden}
@@ -127,11 +128,20 @@ const CONFIG = Object.assign({
   GOONG_BASE: 'https://rsapi.goong.io',
   GOONG_MOTO_VEHICLE: 'bike',                  // loại xe gửi cho Goong khi chọn "Xe máy" (car | bike | taxi | truck | hd): nên đối chiếu với Google Maps
   AUTOCOMPLETE_ON_TYPE: true,                  // true: vừa gõ vừa gợi ý bằng Goong (tốn lượt gọi); false: chỉ tìm khi bấm Enter
-  STYLE_URL: 'https://tiles.openfreemap.org/styles/liberty',
+  STYLE_URL: 'https://tiles.openfreemap.org/styles/liberty',   // nền OpenStreetMap (miễn phí, không cần khóa)
+  GOONG_STYLE_URL: 'https://tiles.goong.io/assets/goong_map_web.json',   // nền Goong: ĐỐI CHIẾU với địa chỉ style trong trang hướng dẫn của Goong
+  GOONG_MAPTILES_KEY: '',                      // khóa "Maptiles" của Goong (khác khóa REST API); dán trong config.js
   CENTER: [108.4, 12.2], ZOOM: 7, MIN_ZOOM: 6,
   BOUNDS: [[105.5, 9.5], [110.5, 15.0]],
   SEARCH_BBOX: [106.3, 10.3, 109.7, 14.0],   // khung tìm địa điểm: tây, nam, đông, bắc
   LOGO: 'logo.png',
+  // CÁC NGUỒN TÌM ĐƯỜNG: bấm OK sẽ hỏi song song tất cả nguồn đang bật, gộp lại và bỏ tuyến trùng nhau.
+  // Đặt false để tắt một nguồn. OSRM chỉ dùng cho ô tô; Valhalla có cả xe máy (motor_scooter).
+  ENGINES: { goong: true, osrm: true, valhalla: true },
+  OSRM_BASE: 'https://router.project-osrm.org',          // máy chủ demo công cộng, miễn phí, không cam kết ổn định
+  VALHALLA_BASE: 'https://valhalla1.openstreetmap.de',   // máy chủ công cộng của OpenStreetMap Đức, miễn phí
+  MAX_ROUTES: 5,                                         // số tuyến tối đa hiển thị
+  ROUTE_TIMEOUT_MS: 12000,
   NEAREST_UNITS: ['D1', 'D2', 'D3'],           // các đơn vị được so sánh khi bấm "Đơn vị gần nhất" (khớp với name trong tru-so.js)
   // DANH SÁCH LỚP trong nút "Lớp". Muốn thêm lớp mới: thêm 1 dòng, rồi đặt kieu tương ứng cho các điểm trong tru-so.js
   // (ví dụ lớp khu công nghiệp: { id: 'kcn', name: 'Khu công nghiệp', kieu: 'kcn', color: '#2e7d32' }). Bỏ "tinh" nếu muốn gộp mọi tỉnh vào một lớp.
@@ -246,7 +256,13 @@ function decodePoly(str, prec = 5) {   // giải mã polyline của Goong (kiể
 }
 /*PURE-END*/
 
-const map = new maplibregl.Map({ container: 'map', style: CONFIG.STYLE_URL, center: CONFIG.CENTER, zoom: CONFIG.ZOOM, minZoom: 3, maxBounds: CONFIG.BOUNDS, pitchWithRotate: false, touchPitch: false });
+/* ===== Nền bản đồ: chuyển OpenStreetMap <-> Goong (lựa chọn được nhớ trên máy) ===== */
+const goongStyleUrl = () => CONFIG.GOONG_STYLE_URL + (CONFIG.GOONG_STYLE_URL.includes('?') ? '&' : '?') + 'api_key=' + encodeURIComponent(CONFIG.GOONG_MAPTILES_KEY);
+const baseUrl = n => n === 'goong' ? goongStyleUrl() : CONFIG.STYLE_URL;
+let curBase = 'osm';
+try { if (localStorage.getItem('ban-do-nen') === 'goong' && CONFIG.GOONG_MAPTILES_KEY) curBase = 'goong'; } catch (e) { /* trình duyệt chặn lưu trữ: dùng nền mặc định */ }
+
+const map = new maplibregl.Map({ container: 'map', style: baseUrl(curBase), center: CONFIG.CENTER, zoom: CONFIG.ZOOM, minZoom: 3, maxBounds: CONFIG.BOUNDS, pitchWithRotate: false, touchPitch: false });
 map.addControl(new maplibregl.NavigationControl({ showZoom: false, showCompass: true, visualizePitch: false }), 'top-right');   // la bàn: chạm để quay về hướng Bắc ở trên
 const geo = new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: true, timeout: 20000 }, trackUserLocation: true, showUserHeading: true, showAccuracyCircle: true, fitBoundsOptions: { maxZoom: 16 } });
 map.addControl(geo, 'bottom-right');                                                                                              // nút định vị nhỏ như Google Maps
@@ -358,6 +374,7 @@ map.on('load', async () => {
   map.addLayer({ id: 'hl-fill', type: 'fill', source: 'hl', paint: { 'fill-color': '#fdd835', 'fill-opacity': 0.28 } }, 'routes-casing');
   map.addLayer({ id: 'hl-line', type: 'line', source: 'hl', layout: { 'line-join': 'round' }, paint: { 'line-color': '#111111', 'line-width': 3 } }, 'routes-casing');
   addLayers();   // các lớp ẩn/hiện (UBND...) vẽ bằng lớp của bản đồ, nằm dưới logo trụ sở
+  fixFonts();    // nếu mở bằng nền Goong, đổi phông chữ cho khớp nền
   addHQ();       // logo D1, D2, D3, E07 là phần tử HTML nên luôn nằm trên các lớp
   map.once('idle', hideLoading);
 });
@@ -435,6 +452,38 @@ function addHQ() {
   }
 }
 
+/* --- Đổi nền: setStyle xóa mọi nguồn/lớp tự thêm, nên chụp lại trước rồi dựng lại sau khi nền mới nạp xong --- */
+const isCustomSrc = id => !!id && (PROV.some(p => p.id === id) || ['mask', 'tinh', 'tinh-pts', 'routes', 'hl'].includes(id) || id.indexOf('lyr-') === 0);
+let snap = null;
+function snapshotCustom() {
+  const st = map.getStyle(); snap = { sources: {}, layers: st.layers.filter(l => isCustomSrc(l.source)) };
+  Object.keys(st.sources).forEach(id => { if (isCustomSrc(id)) snap.sources[id] = st.sources[id]; });
+}
+function fixFonts() {   // chữ của các lớp mình thêm phải dùng phông mà nền hiện tại có; lấy phông đậm đầu tiên trong chính style của nền
+  const st = map.getStyle(); let f = null;
+  st.layers.forEach(l => { const tf = l.layout && l.layout['text-font']; if (!f && !isCustomSrc(l.source) && Array.isArray(tf) && tf.every(x => typeof x === 'string') && tf.some(x => /bold/i.test(x))) f = tf; });
+  if (f) st.layers.forEach(l => { if (isCustomSrc(l.source) && l.type === 'symbol') map.setLayoutProperty(l.id, 'text-font', f); });
+}
+async function setBase(n) {   // trả về false nếu không đổi được (khi đó bảng chọn quay về nền cũ)
+  if (n === curBase) return true;
+  if (n === 'goong') {   // thử tải style trước để báo lỗi rõ ràng, tránh để bản đồ trắng
+    if (!CONFIG.GOONG_MAPTILES_KEY) { say('Chưa có khóa bản đồ Goong. Thêm GOONG_MAPTILES_KEY vào config.js.', 7000); return false; }
+    try { const r = await fetch(goongStyleUrl()); if (!r.ok) throw new Error('mã lỗi ' + r.status); await r.json(); }
+    catch (e) { say('Không tải được nền Goong (' + e.message + '). Kiểm tra khóa và địa chỉ style.', 8000); return false; }
+  }
+  snapshotCustom();
+  map.once('style.load', () => {
+    Object.keys(snap.sources).forEach(id => { if (!map.getSource(id)) map.addSource(id, snap.sources[id]); });
+    snap.layers.forEach(l => { if (!map.getLayer(l.id)) map.addLayer(l); });
+    fixFonts();
+    say('Đã đổi nền: ' + (n === 'goong' ? 'Goong' : 'OpenStreetMap'), 2500);
+  });
+  map.setStyle(baseUrl(n), { diff: false });
+  curBase = n;
+  try { localStorage.setItem('ban-do-nen', n); } catch (e) { /* bỏ qua */ }
+  return true;
+}
+
 /* ===== Lớp ẩn/hiện (UBND...): vẽ bằng lớp bản đồ nên nhẹ, mặc định TẮT; bật trong nút "Lớp" ===== */
 const lyrOn = {};
 const lyrItems = L => HQS.filter(h => h.kieu === L.kieu && (!L.tinh || h.tinh === L.tinh));
@@ -472,6 +521,15 @@ function buildLayerPanel() {
   const off = document.createElement('button'); off.id = 'lyr-off'; off.textContent = 'Ẩn tất cả';
   off.onclick = () => boxes.forEach(([L, cb]) => { cb.checked = false; setLayer(L, false); });
   p.appendChild(off);
+  const hn = document.createElement('div'); hn.className = 'lyr-h'; hn.textContent = 'Nền bản đồ'; hn.style.marginTop = '8px'; p.appendChild(hn);
+  const radios = [];
+  [['osm', 'OpenStreetMap'], ['goong', 'Goong']].forEach(([k, t]) => {
+    const lb = document.createElement('label'); lb.className = 'lyr-it';
+    const rd = document.createElement('input'); rd.type = 'radio'; rd.name = 'nen'; rd.dataset.k = k; rd.checked = curBase === k; radios.push(rd);
+    rd.onchange = async () => { const ok = await setBase(k); if (!ok) radios.forEach(r => { r.checked = r.dataset.k === curBase; }); };
+    const sp = document.createElement('span'); sp.textContent = t; sp.style.flex = '1';
+    lb.appendChild(rd); lb.appendChild(sp); p.appendChild(lb);
+  });
   const h2 = document.createElement('div'); h2.className = 'lyr-h'; h2.textContent = 'Chức năng'; h2.style.marginTop = '8px'; p.appendChild(h2);
   [['Chỉ đường', 'Chọn điểm đi và điểm đến (chạm bản đồ hoặc gõ tên) rồi bấm OK.', false]].forEach(([ten, mota, near]) => {
     const b = document.createElement('button'); b.className = 'lyr-fn'; b.textContent = ten;
@@ -740,22 +798,82 @@ async function goongRoutes(veh, o, d) {   // Goong Directions: routes[].legs[].s
     const coords = decodePoly(rt.overview_polyline.points, 5);
     const all = legs.flatMap(l => l.steps || []);
     const steps = all.map((st, i) => ({ t: viGoong(st), d: (st.distance && st.distance.value) || 0, n: st.name || '', c: st.start_location ? [st.start_location.lng, st.start_location.lat] : coords[0], end: i === all.length - 1 }));
-    const r = mkRoute(coords, dist, dur, steps);
+    const r = mkRoute(coords, dist, dur, steps); r.src = 'Goong';
     if (!r.via && rt.summary) r.via = 'Qua ' + rt.summary;
     return r;
   });
 }
 // Bấm OK: một lần gọi Goong lấy tất cả tuyến, xếp theo thời gian Goong trả về (tuyến đầu = nhanh nhất)
-async function getRoute() {
-  if (!hasKey()) { sugText('Chưa có key Goong. Mở config.js và đặt GOONG_API_KEY.'); return; }
-  sugText('Đang tìm đường…');
-  const my = ++RP.rseq;   // token chống kết quả cũ
-  let list;
-  try { list = await withTimeout(goongRoutes(goongVeh(), RP.from.c, RP.to.c), 15000); } catch (e) { if (my === RP.rseq) sugText('Không tìm được đường: ' + e.message); return; }
-  if (my !== RP.rseq) return;   // trong lúc chờ người dùng đã đổi hành trình
-  RP.near = null; RP.routes = list.sort((a, b) => a.dur - b.dur); RP.sel = 0; RP.steps = false;
-  sugClear(); showRoutes(true);
+/*MERGE-START*/
+// ---- Gộp tuyến từ nhiều nguồn ----
+function mDist(p, a, b) {   // khoảng cách (mét) từ điểm p đến đoạn a-b; tọa độ [lng, lat], xấp xỉ phẳng (đủ chính xác trong vài km)
+  const kx = 111320 * Math.cos(p[1] * Math.PI / 180), ky = 110540;
+  const px = (p[0] - a[0]) * kx, py = (p[1] - a[1]) * ky, dx = (b[0] - a[0]) * kx, dy = (b[1] - a[1]) * ky, l2 = dx * dx + dy * dy;
+  const u = l2 ? Math.max(0, Math.min(1, (px * dx + py * dy) / l2)) : 0;
+  return Math.hypot(px - u * dx, py - u * dy);
 }
+function nearFrac(A, B, tol) {   // tỉ lệ điểm lấy mẫu của A nằm cách đường B không quá tol mét
+  const n = Math.min(40, A.length), step = (A.length - 1) / Math.max(1, n - 1); let ok = 0;
+  for (let k = 0; k < n; k++) {
+    const p = A[Math.round(k * step)]; let best = Infinity;
+    for (let i = 1; i < B.length && best > tol; i++) best = Math.min(best, mDist(p, B[i - 1], B[i]));
+    if (best <= tol) ok++;
+  }
+  return ok / n;
+}
+function sameRoute(a, b, tol = 80, frac = 0.85) {   // trùng nhau nếu phần lớn đường này nằm sát đường kia, và ngược lại
+  return a.length > 1 && b.length > 1 && nearFrac(a, b, tol) >= frac && nearFrac(b, a, tol) >= frac;
+}
+function mergeRoutes(lists, max = 5) {   // lists: mảng các mảng tuyến, nguồn ưu tiên đứng trước; trả về danh sách đã bỏ trùng, xếp theo thời gian
+  const out = [];
+  lists.forEach(l => l.forEach(r => { if (!out.some(o => sameRoute(o.coords, r.coords))) out.push(r); }));
+  return out.sort((a, b) => a.dur - b.dur).slice(0, max);
+}
+/*MERGE-END*/
+async function osrmRoutes(o, d) {   // OSRM demo: chỉ có hồ sơ ô tô; alternatives=3 → tối đa 3 tuyến thay thế
+  const r = await fetch(CONFIG.OSRM_BASE + '/route/v1/driving/' + o.join(',') + ';' + d.join(',') + '?alternatives=3&overview=full&geometries=polyline&steps=true');
+  if (!r.ok) throw new Error('OSRM mã lỗi ' + r.status);
+  const j = await r.json();
+  if (j.code !== 'Ok' || !j.routes || !j.routes.length) throw new Error('OSRM: không có tuyến');
+  return j.routes.map(rt => {
+    const steps = (rt.legs || []).flatMap(l => l.steps || []).map(st => ({ t: '', d: st.distance || 0, n: st.name || '', c: null, end: false }));
+    const x = mkRoute(decodePoly(rt.geometry, 5), rt.distance, rt.duration, steps); x.src = 'OSRM'; return x;
+  });
+}
+async function valhallaRoutes(o, d, moto) {   // Valhalla: alternates=2 → thêm tối đa 2 tuyến thay thế; xe máy dùng motor_scooter
+  const r = await fetch(CONFIG.VALHALLA_BASE + '/route', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ locations: [{ lat: o[1], lon: o[0] }, { lat: d[1], lon: d[0] }], costing: moto ? 'motor_scooter' : 'auto', alternates: 2, directions_language: 'vi-VN' }) });
+  if (!r.ok) throw new Error('Valhalla mã lỗi ' + r.status);
+  const j = await r.json();
+  const trips = [j.trip].concat((j.alternates || []).map(a => a.trip)).filter(Boolean);
+  if (!trips.length) throw new Error('Valhalla: không có tuyến');
+  return trips.map(t => {
+    const legs = t.legs || [];
+    const coords = legs.flatMap(l => decodePoly(l.shape, 6));   // Valhalla mã hóa 6 chữ số thập phân
+    const steps = legs.flatMap(l => l.maneuvers || []).map(m => ({ t: '', d: (m.length || 0) * 1000, n: (m.street_names || [])[0] || '', c: null, end: false }));
+    const x = mkRoute(coords, (t.summary.length || 0) * 1000, t.summary.time || 0, steps); x.src = 'Valhalla'; return x;
+  });
+}
+// Bấm OK: hỏi song song mọi nguồn đang bật; nguồn nào lỗi hoặc chậm thì bỏ qua, nguồn còn lại vẫn hiện
+async function getRoute() {
+  const E = CONFIG.ENGINES, moto = $('rp-prof').value === 'moto', o = RP.from.c, d = RP.to.c;
+  const jobs = [];   // [tên nguồn, promise]
+  if (E.goong && hasKey()) jobs.push(['Goong', goongRoutes(goongVeh(), o, d)]);
+  if (E.osrm && !moto) jobs.push(['OSRM', osrmRoutes(o, d)]);
+  if (E.valhalla) jobs.push(['Valhalla', valhallaRoutes(o, d, moto)]);
+  if (!jobs.length) { sugText('Chưa có nguồn tìm đường nào. Kiểm tra key Goong trong config.js hoặc bật ENGINES.'); return; }
+  sugText('Đang tìm đường (' + jobs.map(j => j[0]).join(', ') + ')…');
+  const my = ++RP.rseq;   // token chống kết quả cũ
+  const res = await Promise.allSettled(jobs.map(j => withTimeout(j[1], CONFIG.ROUTE_TIMEOUT_MS)));
+  if (my !== RP.rseq) return;   // trong lúc chờ người dùng đã đổi hành trình
+  const ok = [], bad = [];
+  res.forEach((r, i) => { if (r.status === 'fulfilled' && r.value.length) ok.push(r.value); else { bad.push(jobs[i][0]); console.warn(jobs[i][0], 'lỗi:', r.reason); } });
+  if (!ok.length) { sugText('Không tìm được đường: ' + (res[0].reason ? res[0].reason.message : 'không có tuyến')); return; }
+  RP.near = null; RP.routes = mergeRoutes(ok, CONFIG.MAX_ROUTES); RP.sel = 0; RP.steps = false;
+  sugClear(); showRoutes(true);
+  if (bad.length) say('Không lấy được từ: ' + bad.join(', '), 5000);
+}
+
 // Đơn vị gần nhất: hỏi Goong đường nhanh nhất từ từng đơn vị (D1, D2, D3) đến điểm đến, rồi xếp hạng theo thời gian
 async function nearest() {
   if (!hasKey()) { sugText('Chưa có key Goong. Mở config.js và đặt GOONG_API_KEY.'); return; }
@@ -799,7 +917,7 @@ function showRoutes(fit) {
       b.textContent = '~' + fmtT(r.dur);
       if (i === 0) { const t = document.createElement('span'); t.className = 'tag'; t.textContent = 'Nhanh nhất'; b.appendChild(t); }
       else if (i === shortest) { const t = document.createElement('span'); t.className = 'tag'; t.style.background = '#1a73e8'; t.textContent = 'Ngắn nhất'; b.appendChild(t); }
-      sm.textContent = (r.via || 'Tuyến ' + (i + 1)) + (diff > 0 ? ' · chậm hơn ' + diff + ' phút' : '');
+      sm.textContent = (r.via || 'Tuyến ' + (i + 1)) + ' · ' + (r.src || '') + (diff > 0 ? ' · chậm hơn ' + diff + ' phút' : '');
     }
     l.appendChild(b); l.appendChild(sm);
     const d = document.createElement('div'); d.className = 'd'; d.textContent = fmtD(r.dist);
@@ -807,10 +925,10 @@ function showRoutes(fit) {
     c.onclick = () => { RP.sel = i; showRoutes(false); };
     sh.appendChild(c);
   });
-  if (R.length === 1 && !RP.near) { const m = document.createElement('div'); m.className = 'msg'; m.textContent = 'Goong chỉ trả về một tuyến cho hành trình này.'; sh.appendChild(m); }
+  if (R.length === 1 && !RP.near) { const m = document.createElement('div'); m.className = 'msg'; m.textContent = 'Các nguồn chỉ trả về một tuyến cho hành trình này.'; sh.appendChild(m); }
   const gb = document.createElement('button'); gb.className = 'lnk'; gb.textContent = 'Mở trong Google Maps (giờ có tính kẹt xe, dẫn đường bằng giọng nói)';
   gb.onclick = () => window.open(gmapsUrl(), '_blank', 'noopener'); sh.appendChild(gb);
-  const note = document.createElement('div'); note.className = 'msg'; note.style.fontSize = '12px'; note.textContent = 'Thời gian và quãng đường do Goong tính. Muốn đối chiếu thực tế, bấm “Mở trong Google Maps”.'; sh.appendChild(note);
+  const note = document.createElement('div'); note.className = 'msg'; note.style.fontSize = '12px'; note.textContent = 'Mỗi tuyến ghi rõ nguồn tính (Goong, OSRM, Valhalla); thời gian của các nguồn khác nhau có thể lệch nhau và OSRM/Valhalla không tính kẹt xe. Muốn đối chiếu thực tế, bấm “Mở trong Google Maps”.'; sh.appendChild(note);
   sheetShow(!RP.hidden);
   if (fit) map.fitBounds(bboxOf(R.flatMap(r => r.coords)), { padding: { top: 220, bottom: Math.round(sh.offsetHeight + 30), left: 40, right: 70 }, maxZoom: 16 });
 }

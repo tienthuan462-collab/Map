@@ -603,8 +603,65 @@ window.HQS = [
   { name: 'UBXBAT', tinh: 'Khánh Hòa', ten: 'Ủy Ban Nhân Dân Xã Bác Ái Tây', lat: 11.858402, lng: 108.772048, kieu: 'rieng' },
 
 ///// KHU CÔNG NGHIỆP (chấm xanh, hiện trong menu "Lớp") /////
-// Cách thêm: bỏ dấu // ở đầu dòng mẫu, sửa tên, tỉnh, lat, lng. Mỗi dòng kết thúc bằng dấu phẩy. Giữ nguyên kieu: 'kcn'.
-// { name: 'KCN1', tinh: 'Đắk Lắk', ten: 'Khu công nghiệp Hòa Phú', lat: 12.630000, lng: 107.976000, kieu: 'kcn' },
-// { name: 'KCN2', tinh: 'Lâm Đồng', ten: 'Khu công nghiệp Lộc Sơn', lat: 11.560000, lng: 107.800000, kieu: 'kcn' },
+  // ================= ĐẮK LẮK =================
+  // 1
+  { name: 'KCNHPH', tinh: 'Đắk Lắk', ten: 'Khu công nghiệp Hòa Phú', lat: 12.600170, lng: 107.940734, kieu: 'kcn' },
+  // 2
+  { name: 'KCNPXU', tinh: 'Đắk Lắk', ten: 'Khu công nghiệp Phú Xuân', lat: 12.777273, lng: 108.168387, kieu: 'kcn' },
+  // 3
+  { name: 'KCNHHI', tinh: 'Đắk Lắk', ten: 'Khu công nghiệp Hòa Hiệp', lat: 13.014102, lng: 109.358873, kieu: 'kcn' },
+  // 4
+  { name: 'KCNDB1', tinh: 'Đắk Lắk', ten: 'Khu công nghiệp Đông Bắc Sông Cầu KV1', lat: 13.592235, lng: 109.248862, kieu: 'kcn' },
+  // 5
+  { name: 'KCNDB2', tinh: 'Đắk Lắk', ten: 'Khu công nghiệp Đông Bắc Sông Cầu KV2', lat: 13.619202, lng: 109.232869, kieu: 'kcn' },
+  // 6
+  { name: 'KCNAPH', tinh: 'Đắk Lắk', ten: 'Khu công nghiệp An Phú', lat: 13.127278, lng: 109.285255, kieu: 'kcn' },
+  // 7
+  { name: 'KCNTAN', tinh: 'Đắk Lắk', ten: 'Cụm công nghiệp Tân An', lat: 12.733482, lng: 108.081956, kieu: 'ccn' },
+  // 8
+  { name: 'KCNEDA', tinh: 'Đắk Lắk', ten: 'Cụm công nghiệp Ea Đar', lat: 12.812839, lng: 108.499896, kieu: 'ccn' },
+  // 9
+  { name: 'KCNCKU', tinh: 'Đắk Lắk', ten: 'Cụm công nghiệp Cư Kuin', lat: 12.571162, lng: 108.120651, kieu: 'ccn' },
+
+  // ================= KHÁNH HÒA =================
+  // 10
+  { name: 'KCNSDA', tinh: 'Khánh Hòa', ten: 'Khu công nghiệp Suối Dầu', lat: 12.157165, lng: 109.074233, kieu: 'kcn' },
+  // 11
+  { name: 'KCNDPH', tinh: 'Khánh Hòa', ten: 'Cụm công nghiệp Diên Phú', lat: 12.280079, lng: 109.124930, kieu: 'ccn' },
+  // 12
+  { name: 'KCNDLO', tinh: 'Khánh Hòa', ten: 'Khu công nghiệp Du Long', lat: 11.692472, lng: 109.051302, kieu: 'kcn' },
+  // 13
+  { name: 'KCNPNA', tinh: 'Khánh Hòa', ten: 'Khu công nghiệp Phước Nam', lat: 11.457854, lng: 108.897635, kieu: 'kcn' },
+  // 14
+  { name: 'KCNTHA', tinh: 'Khánh Hòa', ten: 'Khu công nghiệp Thành Hải', lat: 11.604016, lng: 108.992118, kieu: 'kcn' },
+  // 15
+  { name: 'KCNDLA', tinh: 'Khánh Hòa', ten: 'Cụm công nghiệp Đắc Lộc', lat: 12.301773, lng: 109.162272, kieu: 'ccn' },
+  // 16
+  { name: 'KCNSCA', tinh: 'Khánh Hòa', ten: 'Cụm công nghiệp Sông Cầu', lat: 12.267707, lng: 108.947664, kieu: 'ccn' },
+
+  // ================= LÂM ĐỒNG =================
+  // 17
+  { name: 'KCNPHO', tinh: 'Lâm Đồng', ten: 'Khu công nghiệp Phú Hội', lat: 11.695015, lng: 108.377246, kieu: 'kcn' },
+  // 18
+  { name: 'KCNLSO', tinh: 'Lâm Đồng', ten: 'Khu công nghiệp Lộc Sơn', lat: 11.518112, lng: 107.834426, kieu: 'kcn' },
+  // 19
+  { name: 'KCNTTH', tinh: 'Lâm Đồng', ten: 'Khu công nghiệp Tâm Thắng', lat: 12.608400, lng: 107.920396, kieu: 'kcn' },
+  // 20
+  { name: 'KCNNCO', tinh: 'Lâm Đồng', ten: 'Khu công nghiệp Nhân Cơ', lat: 11.971472, lng: 107.603505, kieu: 'kcn' },
+  // 21
+  { name: 'KCNPTH', tinh: 'Lâm Đồng', ten: 'Khu công nghiệp Phan Thiết', lat: 10.954146, lng: 108.102425, kieu: 'kcn' },
+  // 22
+  { name: 'KCNHK1', tinh: 'Lâm Đồng', ten: 'Khu công nghiệp Hàm Kiệm 1', lat: 10.923955, lng: 108.017506, kieu: 'kcn' },
+  // 23
+  { name: 'KCNHK2', tinh: 'Lâm Đồng', ten: 'Khu công nghiệp Hàm Kiệm 2', lat: 10.928971, lng: 108.001500, kieu: 'kcn' },
+  // 24
+  { name: 'KCNSBI', tinh: 'Lâm Đồng', ten: 'Khu công nghiệp Sông Bình', lat: 11.272086, lng: 108.354549, kieu: 'kcn' },
+  // 25
+  { name: 'KCNTHU', tinh: 'Lâm Đồng', ten: 'Cụm công nghiệp Thuận An', lat: 12.427663, lng: 107.584102, kieu: 'ccn' },
+  // 26
+  { name: 'KCNNHA', tinh: 'Lâm Đồng', ten: 'Cụm công nghiệp Nam Hà', lat: 11.022070, lng: 107.504112, kieu: 'ccn' },
+  // 27
+  { name: 'KCNTB1', tinh: 'Lâm Đồng', ten: 'Cụm công nghiệp Tân Bình 1', lat: 10.723295, lng: 107.782437, kieu: 'ccn' }
+
 
 ];
